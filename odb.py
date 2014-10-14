@@ -90,7 +90,7 @@ class ODB(object):
         curversion = self.version()
         newversion = self.tip() + 1
         self.set('tip', newversion)
-        targetdb = '_'.join([self.db.rsplit('_', 1)[0], str(newversion)])
+        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(newversion)])
         with self.connect() as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) "
@@ -110,8 +110,8 @@ class ODB(object):
         tip = self.tip()
         newversion = tip + 1
         self.set('tip', newversion)
-        sourcedb = '_'.join([self.db.rsplit('_', 1)[0], str(version)])
-        targetdb = '_'.join([self.db.rsplit('_', 1)[0], str(newversion)])
+        sourcedb = '*'.join([self.db.rsplit('*', 1)[0], str(version)])
+        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(newversion)])
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))

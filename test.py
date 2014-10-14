@@ -32,7 +32,7 @@ class TestCommit(unittest.TestCase):
         odb.snapshot()
         self.assertEqual(odb.version(), 2)
         self.assertEqual(odb.parent(), 1)
-        self.assertEqual(odb.db, self.db + '_2')
+        self.assertEqual(odb.db, self.db + '*2')
 
         # revert
         odb.revert(1)
