@@ -22,8 +22,7 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(odb.version(), 0)
         self.assertEqual(odb.parent(), 0)
         # init
-        with self.assertRaises(AlreadyInitialized):
-            odb.init()
+        self.assertEqual(odb.init(), 0)
         # snapshot
         odb.snapshot()
         self.assertEqual(odb.version(), 1)
@@ -44,6 +43,7 @@ class TestCommit(unittest.TestCase):
         odb.snapshot()
         self.assertEqual(odb.version(), 4)
         self.assertEqual(odb.parent(), 3)
+        self.assertEqual(odb.init(), 4)
 
     def tearDown(self):
         """ cleanup test databases

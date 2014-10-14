@@ -1,11 +1,8 @@
+import os
 import argparse
-import logging
 import psycopg2
 from psycopg2.extensions import AsIs
-
-
-class AlreadyInitialized(Exception):
-    pass
+CONF = os.path.expanduser('~/.anybox.pg.odoo')
 
 
 class NotInitialized(Exception):
@@ -46,9 +43,8 @@ class ODB(object):
     def init(self):
         """ initialize the db with the version
         """
+        version = self.get('version')
         with self.connect() as cn, cn.cursor() as cr:
-            cr.execute("SELECT value FROM ir_config_parameter WHERE key = 'odb.version'")
-            version = cr.fetchone()
             if version is None:
                 version = '0'
                 cr.execute("INSERT INTO ir_config_parameter "
@@ -57,8 +53,7 @@ class ODB(object):
                            "(key, value) values ('odb.parent', %s)", version)
                 cr.execute("INSERT INTO ir_config_parameter "
                            "(key, value) values ('odb.tip', %s)", version)
-                return int(version)
-            raise AlreadyInitialized('Already initialized')
+            return int(version)
 
     def set(self, key, value):
         """ set the value of a key
@@ -137,9 +132,46 @@ class ODB(object):
 def main():
     parser = argparse.ArgumentParser(
         prog="odb",
-        description=u"PostgreSQL database snapshotting tool for Odoo",)
-    parser.add_argument('-d', '--database', required=True,
-                        help='Database to snapshot')
+        description=u"PostgreSQL snapshot versionning tool for Odoo",)
+    subparsers = parser.add_subparsers(help='sub-commands')
+    parser_init = subparsers.add_parser('init', help='Set the current db')
+    parser_init.add_argument(
+        'db', metavar='db', nargs=1, help='database to work on')
+    parser_commit = subparsers.add_parser(
+        'commit', help='Clone the current db to a new revision')
+    parser_info = subparsers.add_parser(
+        'info', help='Display revision of the current db')
+    parser_revert = subparsers.add_parser(
+        'revert', help='Drop the current db and clone from a previous revision')
+    parser_revert.add_argument('revision', nargs=1, help='revision to revert to')
+
+    def init(args):
+        odb = ODB(args.db[0])
+        odb.init()
+        open(CONF, 'w').write(odb.db)
+
+    def commit(args):
+        odb = ODB(open(CONF).read())
+        odb.snapshot()
+        print('Now version %s' % odb.version())
+        open(CONF, 'w').write(odb.db)
+
+    def revert(args):
+        odb = ODB(open(CONF).read())
+        revision = args.revision[0]
+        odb.revert(revision)
+        print('Reverted to revision %s, now at revision %s' % (revision, odb.version()))
+        open(CONF, 'w').write(odb.db)
+
+    def info(args):
+        odb = ODB(open(CONF).read())
+        print('database: %s' % odb.db)
+        print('version : %s (parent: %s, tip: %s)' % (odb.version(), odb.parent(), odb.tip()))
+
+    parser_init.set_defaults(func=init)
+    parser_commit.set_defaults(func=commit)
+    parser_info.set_defaults(func=info)
+    parser_revert.set_defaults(func=revert)
 
     args = parser.parse_args()
-    logging.basicConfig(level=args.loglevel)
+    args.func(args)
