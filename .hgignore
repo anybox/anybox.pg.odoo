@@ -1,0 +1,5 @@
+sandbox/
+Sandbox/
+anybox.pg.odoo.egg-info/
+.*pyc$
+.*swp$
