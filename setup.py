@@ -18,6 +18,7 @@ setup(
     author="Christophe Combelles",
     author_email="ccomb@anybox.fr",
     description="Database snapshotting tool for PostgreSQL",
+    long_description=open('README.rst').read(),
     license="GPLv3",
     keywords="postgresql odoo snapshot commit",
     url="",
