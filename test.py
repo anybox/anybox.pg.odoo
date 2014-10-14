@@ -2,14 +2,14 @@ import unittest
 import time
 import psycopg2
 
-from odb import ODB, AlreadyInitialized
+from odb import ODB
 
 
 class TestCommit(unittest.TestCase):
     def setUp(self):
         """ create db
         """
-        db = self.db = 'testodb' + time.strftime('%Y%m%d%H%M%S')
+        db = self.db = 'testodb-' + time.strftime('%Y%m%d%H%M%S')
         # create db
         ODB(db).createdb()
 

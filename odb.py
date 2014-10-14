@@ -5,10 +5,6 @@ from psycopg2.extensions import AsIs
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
 
 
-class NotInitialized(Exception):
-    pass
-
-
 class ODB(object):
     """class representing an Odoo instance
     """
@@ -28,9 +24,9 @@ class ODB(object):
         db = self.db
         with self.connect('postgres') as cn:
             cn.autocommit = True
-            cn.cursor().execute("create database %s", (AsIs(db),))
+            cn.cursor().execute('CREATE DATABASE "%s"', (AsIs(db),))
         with self.connect(db) as cn, cn.cursor() as cr:
-            cr.execute("create table ir_config_parameter "
+            cr.execute("CREATE TABLE ir_config_parameter "
                        "(key character varying(256), value text)")
 
     def dropdb(self):
@@ -38,7 +34,7 @@ class ODB(object):
         """
         with self.connect('postgres') as cn:
             cn.autocommit = True
-            cn.cursor().execute("drop database %s", (AsIs(self.db),))
+            cn.cursor().execute('DROP DATABASE "%s"', (AsIs(self.db),))
 
     def init(self):
         """ initialize the db with the version
@@ -53,7 +49,7 @@ class ODB(object):
                            "(key, value) values ('odb.parent', %s)", version)
                 cr.execute("INSERT INTO ir_config_parameter "
                            "(key, value) values ('odb.tip', %s)", version)
-            return int(version)
+        return int(version)
 
     def set(self, key, value):
         """ set the value of a key
@@ -69,10 +65,8 @@ class ODB(object):
             cr.execute("SELECT value FROM ir_config_parameter WHERE key=%s",
                        ('odb.' + key,))
             res = cr.fetchone()
-            if len(res) == 1:
+            if res is not None and len(res) == 1:
                 return res[0]
-            else:
-                raise NotInitialized()
 
     def version(self):
         """ returns the db version
@@ -96,14 +90,14 @@ class ODB(object):
         curversion = self.version()
         newversion = self.tip() + 1
         self.set('tip', newversion)
-        targetdb = '_'.join([self.db.rsplit('_')[0], str(newversion)])
+        targetdb = '_'.join([self.db.rsplit('_', 1)[0], str(newversion)])
         with self.connect() as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) "
                        "FROM pg_stat_activity "
                        "WHERE pg_stat_activity.datname=%s "
                        "AND pid <> pg_backend_pid();", (self.db,))
-            cr.execute("CREATE DATABASE %s WITH TEMPLATE %s", (AsIs(targetdb), AsIs(self.db)))
+            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
         # switch to the new db
         self.db = targetdb
         self.set('tip', newversion)
@@ -116,12 +110,12 @@ class ODB(object):
         tip = self.tip()
         newversion = tip + 1
         self.set('tip', newversion)
-        sourcedb = '_'.join([self.db.rsplit('_')[0], str(version)])
-        targetdb = '_'.join([self.db.rsplit('_')[0], str(newversion)])
+        sourcedb = '_'.join([self.db.rsplit('_', 1)[0], str(version)])
+        targetdb = '_'.join([self.db.rsplit('_', 1)[0], str(newversion)])
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
-            cr.execute("DROP DATABASE %s", (AsIs(self.db),))
-            cr.execute("CREATE DATABASE %s WITH TEMPLATE %s",
+            cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
+            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"',
                        (AsIs(targetdb), AsIs(sourcedb)))
         self.db = targetdb
         self.set('tip', newversion)
@@ -149,6 +143,7 @@ def main():
         odb = ODB(args.db[0])
         odb.init()
         open(CONF, 'w').write(odb.db)
+        print('Now version %s' % odb.version())
 
     def commit(args):
         odb = ODB(open(CONF).read())
