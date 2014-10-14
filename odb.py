@@ -94,8 +94,9 @@ class ODB(object):
         """
         return int(self.get('tip'))
 
-    def commit(self):
+    def snapshot(self):
         """ create a snapshot and change the current version
+        snapshot corresponds to the checkout or commit commands
         """
         curversion = self.version()
         newversion = self.tip() + 1

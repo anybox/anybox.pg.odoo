@@ -14,34 +14,34 @@ class TestCommit(unittest.TestCase):
         ODB(db).createdb()
 
     def test_simple_commit(self):
-        """ first simple scenario with commit and revert
+        """ first simple scenario with snapshot and revert
         """
         odb = ODB(self.db)
-        # init version
+        # init
         self.assertEqual(odb.init(), 0)
         self.assertEqual(odb.version(), 0)
         self.assertEqual(odb.parent(), 0)
-        # retry the same
+        # init
         with self.assertRaises(AlreadyInitialized):
             odb.init()
-        # commit version 1
-        odb.commit()
+        # snapshot
+        odb.snapshot()
         self.assertEqual(odb.version(), 1)
         self.assertEqual(odb.parent(), 0)
 
-        # commit version 2
-        odb.commit()
+        # snapshot
+        odb.snapshot()
         self.assertEqual(odb.version(), 2)
         self.assertEqual(odb.parent(), 1)
         self.assertEqual(odb.db, self.db + '_2')
 
-        # revert to version 1
+        # revert
         odb.revert(1)
         self.assertEqual(odb.version(), 3)
         self.assertEqual(odb.parent(), 1)
 
-        # commit version 4 (new branch)
-        odb.commit()
+        # snapshot (new branch)
+        odb.snapshot()
         self.assertEqual(odb.version(), 4)
         self.assertEqual(odb.parent(), 3)
 
