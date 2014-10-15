@@ -14,7 +14,7 @@ Changelog
 - Allow to revert without argument
 - Improved doc
 
-0.3 (unreleased)
+0.3 (2014-10-16)
 ----------------
 
 - Keep the same db as the current one to work in place
