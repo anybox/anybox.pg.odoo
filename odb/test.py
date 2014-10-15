@@ -33,21 +33,21 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(odb.parent(), 1)
         self.assertEqual(odb.db, self.db + '*2')
 
-        # revert
+        # revert # TODO test the real revert
         odb.revert()
-        self.assertEqual(odb.version(), 3)
+        self.assertEqual(odb.version(), 2)
         self.assertEqual(odb.parent(), 1)
 
         # snapshot (new branch)
         odb.snapshot()
-        self.assertEqual(odb.version(), 4)
-        self.assertEqual(odb.parent(), 3)
-        self.assertEqual(odb.init(), 4)
+        self.assertEqual(odb.version(), 3)
+        self.assertEqual(odb.parent(), 2)
+        self.assertEqual(odb.init(), 3)
 
-        # revert to 3
-        odb.revert(3)
-        self.assertEqual(odb.version(), 5)
-        self.assertEqual(odb.parent(), 3)
+        # revert to 1 (similar to anonymous branching of hg)
+        odb.revert(1)
+        self.assertEqual(odb.version(), 3)
+        self.assertEqual(odb.parent(), 1)
 
     def tearDown(self):
         """ cleanup test databases

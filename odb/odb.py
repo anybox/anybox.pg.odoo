@@ -85,7 +85,7 @@ class ODB(object):
 
     def snapshot(self):
         """ create a snapshot and change the current version
-        snapshot corresponds to the checkout or commit commands
+        Corresponds to the commit command
         """
         curversion = self.version()
         newversion = self.tip() + 1
@@ -110,19 +110,19 @@ class ODB(object):
         """
         if version is None:
             version = self.parent()
+        # store version and tip because we'll drop
+        curversion = self.version()
         tip = self.tip()
-        newversion = tip + 1
-        self.set('tip', newversion)
         sourcedb = '*'.join([self.db.rsplit('*', 1)[0], str(version)])
-        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(newversion)])
+        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(curversion)])
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"',
                        (AsIs(targetdb), AsIs(sourcedb)))
         self.db = targetdb
-        self.set('tip', newversion)
-        self.set('version', newversion)
+        self.set('tip', tip)
+        self.set('version', curversion)
         self.set('parent', version)
 
 
@@ -156,9 +156,10 @@ def main():
 
     def revert(args):
         odb = ODB(open(CONF).read())
-        revision = args.revision[0] if args.revision is not None else None
+        parent = odb.parent()
+        revision = args.revision[0] if args.revision is not None else parent
         odb.revert(revision)
-        print('Reverted to revision %s, now at revision %s' % (revision, odb.version()))
+        print('Reverted to revision %s, now at revision %s' % (parent, odb.version()))
         open(CONF, 'w').write(odb.db)
 
     def info(args):

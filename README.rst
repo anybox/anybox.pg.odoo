@@ -64,7 +64,7 @@ Commit the current database to create a snapshot and a new version with ``odb co
     $ odb commit
     Now version 3
 
-You can revert back to the last version of the database (the parent) with ``odb revert``:
+You can revert back to the last version of the database (the parent) with ``odb revert``::
 
     $ odb revert
     Reverted to revision 2, now at revision 4
@@ -77,20 +77,27 @@ You can also revert back to any previous version::
     database: demo8*5
     version : 5 (parent: 1, tip: 5)
 
-How it works
-------------
+How it works and pollutes
+-------------------------
 
-It uses the ``CREATE DATABASE ... FROM TEMPLATE ...`` feature of PostgreSQL,
-and currently stores version information in the ``ir_config_parameter`` table
-of Odoo (though this might change in the future).  It expects that the
-connection to PostgreSQL is done through Unix Domain Socket with the current
-user being allowed to create and drop databases.
+- It uses the ``CREATE DATABASE ... FROM TEMPLATE ...`` feature of PostgreSQL
+- It currently stores version information in the ``ir_config_parameter`` table
+  of Odoo (though this will change in the future).
+- It expects that the connection to PostgreSQL is done through Unix Domain
+  Socket with the current user being allowed to create and drop databases.
+- It stores the current database in ``~/.anybox.pg.odoo``
 
 what's next? (todo list)
 ------------------------
 
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
+- Fix obvious bugs
 - Python 3 compatibility
+- Allow to easily find the tip from any version (point 1 will help)
+- Better split responsibility between internal methods and higher level CLI functions
+- Fix the tearDown to remove all test databases
+- Implement tagging
+- Allow to drop all untagged databases
 
 Contribute
 ----------
