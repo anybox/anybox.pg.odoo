@@ -1,11 +1,19 @@
 anybox.pg.odoo
 ==============
 
-PostgreSQL database snapshotting tool for Odoo
+This tool basically manages versionned snapshots of the current database,
+mimicking the common workflow of VCS tools such as init, commit, revert.  It
+was first created to snapshot Odoo databases but may be easily modified to be
+agnostic.
 
 Install
 -------
-::
+
+Install as any normal Python distribution, in a virtualenv, buildout or
+system-wide. The only current dependency is `psycopg2
+<https://pypi.python.org/pypi/psycopg2/>`_ >= 2.5.
+
+Example with a virtualenv::
 
     $ virtualenv sandbox
     $ source sandbox/bin/activate
@@ -13,6 +21,25 @@ Install
 
 Usage
 -----
+
+First read the available commands with ``odb -h``::
+
+    $ odb -h
+    usage: odb [-h] {init,commit,info,revert} ...
+    
+    PostgreSQL snapshot versionning tool for Odoo
+    
+    positional arguments:
+      {init,commit,info,revert}
+                            sub-commands
+        init                Set the current db
+        commit              Clone the current db to a new revision
+        info                Display revision of the current db
+        revert              Drop the current db and clone from a previous revision
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+ 
 
 You should first set the current database with ``odb init``::
 
@@ -45,5 +72,17 @@ You can revert back to a previous version of the database with ``odb revert``::
     database: demo8*4
     version : 4 (parent: 1, tip: 4)
 
+How it works
+------------
 
+It uses the ``CREATE DATABASE ... FROM TEMPLATE ...`` feature of PostgreSQL,
+and currently stores version information in the ``ir_config_parameter`` table
+of Odoo (though this might change in the future).  It expects that the
+connection to PostgreSQL is done through Unix Domain Socket with the current
+user being allowed to create and drop databases.
+
+Contribute
+----------
+
+Mercurial repository and bug tracker: https://bitbucket.org/anybox/anybox.pg.odoo
 
