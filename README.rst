@@ -39,8 +39,8 @@ First read the available commands with ``odb -h``::
       {init,commit,info,revert}
                             sub-commands
         init                Set the current db
-        commit              Clone the current db to a new revision
-        info                Display revision of the current db
+        commit              Save the current db in a new revision
+        info                Display the revision of the current db
         revert              Drop the current db and clone from a previous revision
     
     optional arguments:
@@ -50,38 +50,38 @@ First read the available commands with ``odb -h``::
 You should first set the current database with ``odb init``::
 
     $ odb init demo8
-    Now version 0
+    Now version 1
 
 Then you can get the current version with ``odb info``::
 
     $ odb info
     database: demo8
-    version : 0 (parent: 0, tip: 0)
+    version : 1 (parent: 0)
 
 Commit the current database to create a snapshot and a new version with ``odb commit``::
 
     $ odb commit
-    Now version 1
+    Now version 2
     $ odb info
     database: demo8
-    version : 1 (parent: 0, tip: 1)
-    $ odb commit
-    Now version 2
+    version : 2 (parent: 1)
     $ odb commit
     Now version 3
+    $ odb commit
+    Now version 4
 
 You can revert back to the last version of the database (the parent) with ``odb revert``::
 
     $ odb revert
-    Reverted to revision 2, now at revision 3
+    Reverted to parent 3, now at revision 4
 
 You can also revert back to any previous version::
 
-    $ odb revert 1
-    Reverted to revision 1, now at revision 3
+    $ odb revert 2
+    Reverted to parent 2, now at revision 5
     $ odb info
     database: demo8
-    version : 3 (parent: 1, tip: 3)
+    version : 5 (parent: 2)
 
 How it works and pollutes
 -------------------------
@@ -99,12 +99,10 @@ what's next? (todo list)
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
 - Fix obvious bugs
 - Python 3 compatibility
-- Allow to easily find the tip from any version (point 1 will help)
-- Better split responsibility between internal methods and higher level CLI functions
-- Fix the tearDown to remove all test databases
 - Implement tagging
 - Allow to drop all untagged databases
 - Improve the database naming scheme
+- Try to make the system transactional
 
 Contribute
 ----------

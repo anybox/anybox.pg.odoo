@@ -42,13 +42,11 @@ class ODB(object):
         version = self.get('version')
         with self.connect() as cn, cn.cursor() as cr:
             if version is None:
-                version = '0'
+                version = '1'
                 cr.execute("INSERT INTO ir_config_parameter "
                            "(key, value) values ('odb.version', %s)", version)
                 cr.execute("INSERT INTO ir_config_parameter "
-                           "(key, value) values ('odb.parent', %s)", version)
-                cr.execute("INSERT INTO ir_config_parameter "
-                           "(key, value) values ('odb.tip', %s)", version)
+                           "(key, value) values ('odb.parent', %s)", '0')
         return int(version)
 
     def set(self, key, value):
@@ -78,49 +76,45 @@ class ODB(object):
         """
         return int(self.get('parent'))
 
-    def tip(self):
-        """ get the latest version
+    def _disconnect(self, cr, db):
+        """ kill all pg connections
         """
-        return int(self.get('tip'))
+        cr.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) "
+                   "FROM pg_stat_activity "
+                   "WHERE pg_stat_activity.datname=%s "
+                   "AND pid <> pg_backend_pid();", (db,))
 
     def snapshot(self):
         """ create a snapshot and change the current version
         Corresponds to the commit command
         """
+        version = self.version()
+        targetdb = '*'.join([self.db, str(version)])
+        with self.connect('postgres') as cn, cn.cursor() as cr:
+            cn.autocommit = True
+            self._disconnect(cr, self.db)
+            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
+        self.set('version', version + 1)
+        self.set('parent', version)
+
+    def revert(self, parent=None):
+        """ drop the current db and start back from this parent
+        (or the current parent if no parent is specified)
+        """
+        if parent is None:
+            parent = self.parent()
+        # store version because we'll drop
         curversion = self.version()
-        newversion = self.tip() + 1
-        self.set('tip', newversion)
-        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(newversion)])
+        sourcedb = '*'.join([self.db, str(parent)])
         with self.connect() as cn, cn.cursor() as cr:
             cn.autocommit = True
-            cr.execute("SELECT pg_terminate_backend(pg_stat_activity.pid) "
-                       "FROM pg_stat_activity "
-                       "WHERE pg_stat_activity.datname=%s "
-                       "AND pid <> pg_backend_pid();", (self.db,))
-            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
-        # switch to the new db
-        self.set('tip', newversion)
-        self.set('version', newversion)
-        self.set('parent', curversion)
-
-    def revert(self, version=None):
-        """ drop the current db and start back from this version
-        (or the parent if no version is specified)
-        """
-        if version is None:
-            version = self.parent()
-        # store version and tip because we'll drop
-        curversion = self.version()
-        tip = self.tip()
-        sourcedb = '*'.join([self.db.rsplit('*', 1)[0], str(version)])
+            self._disconnect(cr, self.db)
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
-            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"',
-                       (AsIs(self.db), AsIs(sourcedb)))
-        self.set('tip', tip)
+            cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(self.db), AsIs(sourcedb)))
         self.set('version', curversion)
-        self.set('parent', version)
+        self.set('parent', parent)
 
 
 def main():
@@ -132,9 +126,9 @@ def main():
     parser_init.add_argument(
         'db', metavar='db', nargs=1, help='database to work on')
     parser_commit = subparsers.add_parser(
-        'commit', help='Clone the current db to a new revision')
+        'commit', help='Save the current db in a new revision')
     parser_info = subparsers.add_parser(
-        'info', help='Display revision of the current db')
+        'info', help='Display the revision of the current db')
     parser_revert = subparsers.add_parser(
         'revert', help='Drop the current db and clone from a previous revision')
     parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
@@ -149,20 +143,19 @@ def main():
         odb = ODB(open(CONF).read())
         odb.snapshot()
         print('Now version %s' % odb.version())
-        open(CONF, 'w').write(odb.db)
 
     def revert(args):
         odb = ODB(open(CONF).read())
-        parent = odb.parent()
-        revision = args.revision[0] if args.revision is not None else parent
-        odb.revert(revision)
-        print('Reverted to revision %s, now at revision %s' % (parent, odb.version()))
-        open(CONF, 'w').write(odb.db)
+        if args.revision:
+            odb.revert(args.revision[0])
+        else:
+            odb.revert()
+        print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.version()))
 
     def info(args):
         odb = ODB(open(CONF).read())
         print('database: %s' % odb.db)
-        print('version : %s (parent: %s, tip: %s)' % (odb.version(), odb.parent(), odb.tip()))
+        print('version : %s (parent: %s)' % (odb.version(), odb.parent()))
 
     parser_init.set_defaults(func=init)
     parser_commit.set_defaults(func=commit)

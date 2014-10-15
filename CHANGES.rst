@@ -17,4 +17,7 @@ Changelog
 0.3 (unreleased)
 ----------------
 
-- Keep the same db as the current one
+- Keep the same db as the current one to work in place
+- Fixed versionning and start at 1
+- Also disconnect during revert operation
+- Removed the unneeded tip
