@@ -98,6 +98,7 @@ what's next? (todo list)
 - Fix the tearDown to remove all test databases
 - Implement tagging
 - Allow to drop all untagged databases
+- Improve the database naming scheme
 
 Contribute
 ----------
