@@ -64,13 +64,18 @@ Commit the current database to create a snapshot and a new version with ``odb co
     $ odb commit
     Now version 3
 
-You can revert back to a previous version of the database with ``odb revert``::
+You can revert back to the last version of the database (the parent) with ``odb revert``:
+
+    $ odb revert
+    Reverted to revision 2, now at revision 4
+
+You can also revert back to any previous version::
 
     $ odb revert 1
-    Reverted to revision 1, now at revision 4
+    Reverted to revision 1, now at revision 5
     $ odb info
-    database: demo8*4
-    version : 4 (parent: 1, tip: 4)
+    database: demo8*5
+    version : 5 (parent: 1, tip: 5)
 
 How it works
 ------------
@@ -80,6 +85,12 @@ and currently stores version information in the ``ir_config_parameter`` table
 of Odoo (though this might change in the future).  It expects that the
 connection to PostgreSQL is done through Unix Domain Socket with the current
 user being allowed to create and drop databases.
+
+what's next? (todo list)
+------------------------
+
+- Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
+- Python 3 compatibility
 
 Contribute
 ----------

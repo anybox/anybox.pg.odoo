@@ -1,6 +1,5 @@
 import unittest
 import time
-import psycopg2
 
 from odb import ODB
 
@@ -35,7 +34,7 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(odb.db, self.db + '*2')
 
         # revert
-        odb.revert(1)
+        odb.revert()
         self.assertEqual(odb.version(), 3)
         self.assertEqual(odb.parent(), 1)
 
@@ -44,6 +43,11 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(odb.version(), 4)
         self.assertEqual(odb.parent(), 3)
         self.assertEqual(odb.init(), 4)
+
+        # revert to 3
+        odb.revert(3)
+        self.assertEqual(odb.version(), 5)
+        self.assertEqual(odb.parent(), 3)
 
     def tearDown(self):
         """ cleanup test databases

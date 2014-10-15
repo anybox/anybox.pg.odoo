@@ -104,9 +104,12 @@ class ODB(object):
         self.set('version', newversion)
         self.set('parent', curversion)
 
-    def revert(self, version):
+    def revert(self, version=None):
         """ drop the current db and start back from this version
+        (or the parent if no version is specified)
         """
+        if version is None:
+            version = self.parent()
         tip = self.tip()
         newversion = tip + 1
         self.set('tip', newversion)
@@ -137,7 +140,7 @@ def main():
         'info', help='Display revision of the current db')
     parser_revert = subparsers.add_parser(
         'revert', help='Drop the current db and clone from a previous revision')
-    parser_revert.add_argument('revision', nargs=1, help='revision to revert to')
+    parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
 
     def init(args):
         odb = ODB(args.db[0])
@@ -153,7 +156,7 @@ def main():
 
     def revert(args):
         odb = ODB(open(CONF).read())
-        revision = args.revision[0]
+        revision = args.revision[0] if args.revision is not None else None
         odb.revert(revision)
         print('Reverted to revision %s, now at revision %s' % (revision, odb.version()))
         open(CONF, 'w').write(odb.db)

@@ -4,7 +4,7 @@ setup(
     version="0.2",
     packages=find_packages(),
     install_requires=['psycopg2>=2.5'],
-    test_suite='test',
+    test_suite='odb.test',
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
