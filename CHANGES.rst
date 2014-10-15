@@ -17,4 +17,4 @@ Changelog
 0.3 (unreleased)
 ----------------
 
-- ...
+- Keep the same db as the current one

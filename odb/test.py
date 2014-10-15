@@ -26,12 +26,13 @@ class TestCommit(unittest.TestCase):
         odb.snapshot()
         self.assertEqual(odb.version(), 1)
         self.assertEqual(odb.parent(), 0)
+        # the db name remains the same
+        self.assertEqual(self.db, odb.db)
 
         # snapshot
         odb.snapshot()
         self.assertEqual(odb.version(), 2)
         self.assertEqual(odb.parent(), 1)
-        self.assertEqual(odb.db, self.db + '*2')
 
         # revert # TODO test the real revert
         odb.revert()
@@ -48,6 +49,7 @@ class TestCommit(unittest.TestCase):
         odb.revert(1)
         self.assertEqual(odb.version(), 3)
         self.assertEqual(odb.parent(), 1)
+        self.assertEqual(self.db, odb.db)
 
     def tearDown(self):
         """ cleanup test databases

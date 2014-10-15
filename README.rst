@@ -19,7 +19,7 @@ Example with a virtualenv::
     $ source sandbox/bin/activate
     $ pip install anybox.pg.odoo
 
-Example in a dedicated part of buildout::
+Example in a dedicated part of a buildout::
 
     [odb]
     recipe = zc.recipe.egg
@@ -63,7 +63,7 @@ Commit the current database to create a snapshot and a new version with ``odb co
     $ odb commit
     Now version 1
     $ odb info
-    database: demo8*1
+    database: demo8
     version : 1 (parent: 0, tip: 1)
     $ odb commit
     Now version 2
@@ -80,7 +80,7 @@ You can also revert back to any previous version::
     $ odb revert 1
     Reverted to revision 1, now at revision 3
     $ odb info
-    database: demo8*3
+    database: demo8
     version : 3 (parent: 1, tip: 3)
 
 How it works and pollutes

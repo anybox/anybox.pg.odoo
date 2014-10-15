@@ -99,7 +99,6 @@ class ODB(object):
                        "AND pid <> pg_backend_pid();", (self.db,))
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
         # switch to the new db
-        self.db = targetdb
         self.set('tip', newversion)
         self.set('version', newversion)
         self.set('parent', curversion)
@@ -114,13 +113,11 @@ class ODB(object):
         curversion = self.version()
         tip = self.tip()
         sourcedb = '*'.join([self.db.rsplit('*', 1)[0], str(version)])
-        targetdb = '*'.join([self.db.rsplit('*', 1)[0], str(curversion)])
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"',
-                       (AsIs(targetdb), AsIs(sourcedb)))
-        self.db = targetdb
+                       (AsIs(self.db), AsIs(sourcedb)))
         self.set('tip', tip)
         self.set('version', curversion)
         self.set('parent', version)
