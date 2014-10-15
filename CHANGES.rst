@@ -14,3 +14,7 @@ Changelog
 - Allow to revert without argument
 - Improved doc
 
+0.3 (unreleased)
+----------------
+
+- ...
