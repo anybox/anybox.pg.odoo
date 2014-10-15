@@ -19,6 +19,12 @@ Example with a virtualenv::
     $ source sandbox/bin/activate
     $ pip install anybox.pg.odoo
 
+Example in a dedicated part of buildout::
+
+    [odb]
+    recipe = zc.recipe.egg
+    eggs = anybox.pg.odoo
+
 Usage
 -----
 
@@ -67,20 +73,20 @@ Commit the current database to create a snapshot and a new version with ``odb co
 You can revert back to the last version of the database (the parent) with ``odb revert``::
 
     $ odb revert
-    Reverted to revision 2, now at revision 4
+    Reverted to revision 2, now at revision 3
 
 You can also revert back to any previous version::
 
     $ odb revert 1
-    Reverted to revision 1, now at revision 5
+    Reverted to revision 1, now at revision 3
     $ odb info
-    database: demo8*5
-    version : 5 (parent: 1, tip: 5)
+    database: demo8*3
+    version : 3 (parent: 1, tip: 3)
 
 How it works and pollutes
 -------------------------
 
-- It uses the ``CREATE DATABASE ... FROM TEMPLATE ...`` feature of PostgreSQL
+- It uses the ``CREATE DATABASE FROM TEMPLATE`` feature of PostgreSQL
 - It currently stores version information in the ``ir_config_parameter`` table
   of Odoo (though this will change in the future).
 - It expects that the connection to PostgreSQL is done through Unix Domain
