@@ -96,10 +96,11 @@ How it works and pollutes
 what's next? (todo list)
 ------------------------
 
+- disable connections on versionned databases (see datallowconn)
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
 - Fix obvious bugs
 - Python 3 compatibility
-- Implement tagging
+- Implement tag and diff
 - Allow to drop all untagged databases
 - Improve the database naming scheme
 - Try to make the system transactional
