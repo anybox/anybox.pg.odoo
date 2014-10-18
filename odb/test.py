@@ -18,54 +18,61 @@ class TestCommit(unittest.TestCase):
         odb = ODB(self.db)
         # init
         self.assertEqual(odb.init(), 1)
-        self.assertEqual(odb.version(), 1)
+        self.assertEqual(odb.revision(), 1)
         self.assertEqual(odb.parent(), 0)
         # init
         self.assertEqual(odb.init(), 1)
         # snapshot
         odb.snapshot()
-        self.assertEqual(odb.version(), 2)
+        self.assertEqual(odb.revision(), 2)
         self.assertEqual(odb.parent(), 1)
         # the db name remains the same
         self.assertEqual(self.db, odb.db)
 
         # snapshot
         odb.snapshot()
-        self.assertEqual(odb.version(), 3)
+        self.assertEqual(odb.revision(), 3)
         self.assertEqual(odb.parent(), 2)
 
         # revert # TODO test the real revert
         odb.revert()
-        self.assertEqual(odb.version(), 3)
+        self.assertEqual(odb.revision(), 3)
         self.assertEqual(odb.parent(), 2)
 
         # snapshot
         odb.snapshot()
-        self.assertEqual(odb.version(), 4)
+        self.assertEqual(odb.revision(), 4)
         self.assertEqual(odb.parent(), 3)
         # just check that init again doesn't hurt
         self.assertEqual(odb.init(), 4)
 
         # revert to 2
         odb.revert(2)
-        self.assertEqual(odb.version(), 4)
+        self.assertEqual(odb.revision(), 4)
         self.assertEqual(odb.parent(), 2)
         self.assertEqual(self.db, odb.db)
 
         # snapshot
         odb.snapshot()
-        self.assertEqual(odb.version(), 5)
+        self.assertEqual(odb.revision(), 5)
         self.assertEqual(odb.parent(), 4)
 
+        # list all revisions
+        revs = odb.log()
+        self.assertEqual(revs[-1]['revision'], '1')
+        self.assertEqual(revs[1]['db'], self.db + '*4')
+        self.assertEqual(revs[0]['revision'], '5')
+
+        # purge all revisions
+        odb.purge('all')
+
         # for teardown
-        self.last = odb.version()
+        self.last = odb.revision()
 
     def tearDown(self):
-        """ cleanup test databases
+        """ cleanup
         """
         # clean the current db
         odb = ODB(self.db)
+        odb.purge('all')
         odb.dropdb()
-        for v in range(1, self.last):
-            odb.db = '*'.join([self.db, str(v)])
-            odb.dropdb()

@@ -50,38 +50,38 @@ First read the available commands with ``odb -h``::
 You should first set the current database with ``odb init``::
 
     $ odb init demo8
-    Now version 1
+    Now revision 1
 
-Then you can get the current version with ``odb info``::
+Then you can get the current revision with ``odb info``::
 
     $ odb info
     database: demo8
-    version : 1 (parent: 0)
+    revision : 1 (parent: 0)
 
-Commit the current database to create a snapshot and a new version with ``odb commit``::
+Commit the current database to create a snapshot and a new revision with ``odb commit``::
 
     $ odb commit
-    Now version 2
+    Now revision 2
     $ odb info
     database: demo8
-    version : 2 (parent: 1)
+    revision : 2 (parent: 1)
     $ odb commit
-    Now version 3
+    Now revision 3
     $ odb commit
-    Now version 4
+    Now revision 4
 
-You can revert back to the last version of the database (the parent) with ``odb revert``::
+You can revert back to the last revision of the database (the parent) with ``odb revert``::
 
     $ odb revert
     Reverted to parent 3, now at revision 4
 
-You can also revert back to any previous version::
+You can also revert back to any previous revision
 
     $ odb revert 2
     Reverted to parent 2, now at revision 5
     $ odb info
     database: demo8
-    version : 5 (parent: 2)
+    revision : 5 (parent: 2)
 
 How it works and pollutes
 -------------------------

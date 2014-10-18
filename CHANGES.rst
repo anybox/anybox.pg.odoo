@@ -21,3 +21,11 @@ Changelog
 - Fixed versionning and start at 1
 - Also disconnect during revert operation
 - Removed the unneeded tip
+
+0.4 (?)
+-------
+
+- renamed version to revision
+- implemented ``odb log``
+- implemented ``odb purge``
+
