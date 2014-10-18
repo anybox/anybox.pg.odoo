@@ -25,7 +25,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'odb=odb.odb:main',
+            'odb=odb.cli:main',
         ],
     },
 )
