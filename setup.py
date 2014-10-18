@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="anybox.pg.odoo",
-    version="0.3",
+    version="0.4",
     packages=find_packages(),
     install_requires=['psycopg2>=2.5'],
     test_suite='odb.test',
@@ -10,7 +10,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
     ],
 
 
