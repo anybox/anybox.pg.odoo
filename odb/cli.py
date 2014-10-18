@@ -1,6 +1,6 @@
 import os
 import argparse
-from .odb import ODB
+from .odb import ODB, TagExists
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
 
 
@@ -17,11 +17,15 @@ def main():
         'revert', help='Drop the current db and clone from a previous revision')
     parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
     parser_log = subparsers.add_parser('log', help='List all available revisions')
-    parser_purge = subparsers.add_parser(
-        'purge', help="Destroy revisions")
+    parser_purge = subparsers.add_parser('purge', help="Destroy revisions")
     parser_purge.add_argument('what', choices=['all'],
                               help='all: destroy all revisions except the current db')
     parser_purge.add_argument('-y', '--yes', action='store_true', help='Destroy without asking')
+    parser_tags = subparsers.add_parser('tags', help="List all tags")
+    parser_tag = subparsers.add_parser('tag', help="Tag a specific revision")
+    parser_tag.add_argument('-d', '--delete', action='store_true', help='Delete tag')
+    parser_tag.add_argument('tag', help='Tag')
+    parser_tag.add_argument('revision', metavar='revision', nargs='?', help='Revision')
 
     def init(args):
         odb = ODB(args.db[0])
@@ -31,13 +35,15 @@ def main():
 
     def commit(args):
         odb = ODB(open(CONF).read())
-        odb.snapshot()
+        odb.commit()
         print('Now revision %s' % odb.revision())
 
     def revert(args):
         odb = ODB(open(CONF).read())
-        if args.revision:
-            odb.revert(args.revision[0])
+        if args.revision and args.revision.isdigit():
+            odb.revert(parent=args.revision)
+        elif args.revision and args.revision.isalnum():
+            odb.revert(tag=args.revision)
         else:
             odb.revert()
         print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
@@ -51,6 +57,8 @@ def main():
         odb = ODB(open(CONF).read())
         for logitem in odb.log():
             print '%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem
+            if 'tag' in logitem:
+                print '\ttag: %s' % logitem['tag']
 
     def purge(args):
         odb = ODB(open(CONF).read())
@@ -66,6 +74,21 @@ def main():
         else:
             print 'Cancelled'
 
+    def tags(args):
+        odb = ODB(open(CONF).read())
+        tags = odb.tag()
+        for item in tags:
+            print '%(tag)s (%(db)s)' % item
+
+    def tag(args):
+        odb = ODB(open(CONF).read())
+        if args.delete:
+            return odb.tag(args.tag, delete=True)
+        try:
+            odb.tag(args.tag, args.revision)
+        except TagExists:
+            print 'This tag already exists'
+
     parser_init.set_defaults(func=init)
     parser_commit.set_defaults(func=commit)
     parser_info.set_defaults(func=info)
@@ -73,6 +96,8 @@ def main():
     parser_info.set_defaults(func=info)
     parser_log.set_defaults(func=log)
     parser_purge.set_defaults(func=purge)
+    parser_tags.set_defaults(func=tags)
+    parser_tag.set_defaults(func=tag)
 
     args = parser.parse_args()
     args.func(args)

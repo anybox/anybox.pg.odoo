@@ -2,6 +2,10 @@ import psycopg2
 from psycopg2.extensions import AsIs
 
 
+class TagExists(Exception):
+    pass
+
+
 class ODB(object):
     """class representing an Odoo instance
     """
@@ -43,21 +47,25 @@ class ODB(object):
         with self.connect() as cn, cn.cursor() as cr:
             if revision is None:
                 revision = '1'
-                cr.execute("INSERT INTO ir_config_parameter "
-                           "(key, value) values ('odb.revision', %s)", revision)
-                cr.execute("INSERT INTO ir_config_parameter "
-                           "(key, value) values ('odb.parent', %s)", '0')
+                self.set('revision', revision, cr)
+                self.set('parent', '0', cr)
         return int(revision)
 
     def set(self, key, value, cr=None):
         """ set the value of a key
         """
-        req = "UPDATE ir_config_parameter SET value=%s WHERE key=%s"
+        update = "UPDATE ir_config_parameter SET value=%s WHERE key=%s"
+        insert = "INSERT INTO ir_config_parameter (value, key) values (%s, %s)"
+        values = (str(value), 'odb.%s' % key)
         if cr is not None:
-            cr.execute(req, (str(value), 'odb.%s' % key))
+            cr.execute(update, values)
+            if not cr.rowcount:
+                cr.execute(insert, values)
         else:
             with self.connect() as cn, cn.cursor() as cr:
-                cr.execute(req, (str(value), 'odb.%s' % key))
+                cr.execute(update, values)
+                if not cr.rowcount:
+                    cr.execute(insert, values)
 
     def get(self, key, cr=None):
         """ get the value of a key
@@ -72,6 +80,16 @@ class ODB(object):
                 res = cr.fetchone()
         if res is not None and len(res) == 1:
             return res[0]
+
+    def rem(self, key, cr=None):
+        """ delete a key
+        """
+        req = "DELETE FROM ir_config_parameter WHERE key=%s"
+        if cr is not None:
+            cr.execute(req, ('odb.' + key,))
+        else:
+            with self.connect() as cn, cn.cursor() as cr:
+                cr.execute(req, ('odb.' + key,))
 
     def revision(self):
         """ returns the db revision
@@ -91,7 +109,7 @@ class ODB(object):
                    "WHERE pg_stat_activity.datname=%s "
                    "AND pid <> pg_backend_pid();", (db,))
 
-    def snapshot(self):
+    def commit(self):
         """ create a snapshot and change the current revision
         Corresponds to the commit command
         """
@@ -103,13 +121,20 @@ class ODB(object):
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
         self.set('revision', revision + 1)
         self.set('parent', revision)
+        self.rem('tag')
 
-    def revert(self, parent=None):
+    def revert(self, parent=None, tag=None):
         """ drop the current db and start back from this parent
         (or the current parent if no parent is specified)
         """
-        if parent is None:
+        if parent is None and tag is None:  # revert to last
             parent = self.parent()
+        if tag:  # revert to tag
+            tagfound = [r for r in self.log() if r.get('tag') == tag]
+            if tagfound:
+                parent = tagfound[0]['revision']
+            else:
+                return
         # store revision because we'll drop
         currevision = self.revision()
         sourcedb = '*'.join([self.db, str(parent)])
@@ -122,6 +147,7 @@ class ODB(object):
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(self.db), AsIs(sourcedb)))
         self.set('revision', currevision)
         self.set('parent', parent)
+        self.rem('tag')
 
     def log(self):
         """ return a list of previous revisions, each revision being a dict with needed infos
@@ -135,9 +161,12 @@ class ODB(object):
             with self.connect(db) as cn, cn.cursor() as cr:
                 log.append({
                     'db': db,
-                    'revision': self.get('revision', cr),
-                    'parent': self.get('parent', cr),
+                    'revision': int(self.get('revision', cr)),
+                    'parent': int(self.get('parent', cr)),
                 })
+                tag = self.get('tag', cr)
+                if tag:
+                    log[-1]['tag'] = tag
         return sorted(log, key=lambda x: x['revision'], reverse=True)
 
     def purge(self, what, confirm=False):
@@ -154,3 +183,26 @@ class ODB(object):
             for logitem in to_purge:
                 self.dropdb(logitem['db'])
         return to_purge
+
+    def tag(self, tag=None, revision=None, delete=False):
+        """ tag a specific revision or the current one by default
+        """
+        tags = [r for r in self.log() if 'tag' in r]
+        if delete:
+            if tag in [r.get('tag') for r in tags]:
+                db = [r['db'] for r in tags if r.get('tag') == tag][0]
+                with self.connect(db) as cn, cn.cursor() as cr:
+                    return self.rem('tag', cr)
+            return
+        if tag is None and revision is None:
+            return tags
+        if tag is not None and tag in [r.get('tag') for r in tags]:
+            raise TagExists('This tag already exists')
+        if revision is None:
+            revision = self.revision()
+        if self.revision() == revision:
+            db = self.db
+        else:
+            db = '%s*%s' % (self.db, revision)
+        with self.connect(db) as cn, cn.cursor() as cr:
+            self.set('tag', tag, cr)

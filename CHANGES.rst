@@ -22,10 +22,13 @@ Changelog
 - Also disconnect during revert operation
 - Removed the unneeded tip
 
-0.4 (?)
--------
+0.4 (2014-10-19)
+----------------
 
-- renamed version to revision
 - implemented ``odb log``
 - implemented ``odb purge``
+- implemented ``odb tag`` and revert to tag
+- implemented ``odb tags``
+- renamed version to revision
+- renamed snapshot() to commit()
 
