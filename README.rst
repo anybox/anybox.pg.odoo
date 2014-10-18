@@ -19,33 +19,21 @@ Example with a virtualenv::
     $ source sandbox/bin/activate
     $ pip install anybox.pg.odoo
 
-Example in a dedicated part of a buildout::
-
-    [odb]
-    recipe = zc.recipe.egg
-    eggs = anybox.pg.odoo
-
 Usage
 -----
 
-First read the available commands with ``odb -h``::
+First read the available commands with ``odb -h``.
+You get the available commands::
 
-    $ odb -h
-    usage: odb [-h] {init,commit,info,revert} ...
-    
-    PostgreSQL snapshot versionning tool for Odoo
-    
-    positional arguments:
-      {init,commit,info,revert}
-                            sub-commands
         init                Set the current db
         commit              Save the current db in a new revision
         info                Display the revision of the current db
         revert              Drop the current db and clone from a previous revision
-    
-    optional arguments:
-      -h, --help            show this help message and exit
- 
+        log                 List all available revisions
+        purge               Destroy revisions
+        tags                List all tags
+        tag                 Tag a specific revision
+
 
 You should first set the current database with ``odb init``::
 
@@ -75,13 +63,42 @@ You can revert back to the last revision of the database (the parent) with ``odb
     $ odb revert
     Reverted to parent 3, now at revision 4
 
-You can also revert back to any previous revision
+You can also revert back to any previous revision::
 
     $ odb revert 2
-    Reverted to parent 2, now at revision 5
+    Reverted to parent 2, now at revision 4
     $ odb info
     database: demo8
-    revision : 5 (parent: 2)
+    revision : 4 (parent: 2)
+
+You can put tags on a revision, revert to a tag and delete a tag with ``odb tag`` and ``odb tags``::
+
+    $ odb tag v1 2
+    $ odb tag v2 3
+    $ odb tags
+    v2 (demo8*3)
+    v1 (demo8*2)
+    $ odb revert v1
+    Reverted to parent 2, now at revision 4
+    $ odb tag -d v1
+
+The you can display all the revisions with ``odb log``::
+
+    $ odb log
+    demo8:
+        revision: 4
+        parent: 2
+    demo8*3:
+        revision: 3
+        parent: 2
+        tag: v2
+    demo8*2:
+        revision: 2
+        parent: 1
+    demo8*1:
+        revision: 1
+        parent: 0
+
 
 How it works and pollutes
 -------------------------
@@ -100,7 +117,7 @@ what's next? (todo list)
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
 - Fix obvious bugs
 - Python 3 compatibility
-- Implement tag and diff
+- Implement diff (#fear)
 - Allow to drop all untagged databases
 - Improve the database naming scheme
 - Try to make the system transactional
