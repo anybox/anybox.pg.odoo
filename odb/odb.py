@@ -140,8 +140,9 @@ class ODB(object):
                 })
         return sorted(log, key=lambda x: x['revision'], reverse=True)
 
-    def purge(self, what, confirm=True):
+    def purge(self, what, confirm=False):
         """ purge the revisions
+        what can be: 'all'
         """
         # first get what will be purged, then confirm
         to_purge = [l for l in self.log() if l['db'] != self.db]

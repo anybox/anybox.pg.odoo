@@ -63,16 +63,17 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(revs[1]['db'], self.db + '*4')
         self.assertEqual(revs[0]['revision'], '5')
 
-        # purge all revisions
+        # purge without confirmation does nothing
         odb.purge('all')
+        self.assertEqual(len(odb.log()), 5)
 
-        # for teardown
-        self.last = odb.revision()
+        # check for real
+        odb.purge('all', confirm=True)
+        self.assertEqual(len(odb.log()), 1)
 
     def tearDown(self):
         """ cleanup
         """
         # clean the current db
         odb = ODB(self.db)
-        odb.purge('all')
         odb.dropdb()
