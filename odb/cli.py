@@ -1,5 +1,9 @@
 import os
-import argparse
+try:
+    import argparse
+except ImportError: # Python3.1
+    print("Please install argparse")
+    exit()
 from .odb import ODB, TagExists
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
 

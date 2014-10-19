@@ -9,7 +9,7 @@ agnostic.
 Install
 -------
 
-This tool works on Python 2.7 and Python 3.
+This tool works on Python 2.7 and Python 3.x
 Install as any normal Python distribution, in a virtualenv, buildout or
 system-wide. The only current dependency is `psycopg2
 <https://pypi.python.org/pypi/psycopg2/>`_ >= 2.5.
