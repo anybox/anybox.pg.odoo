@@ -25,15 +25,16 @@ Changelog
 0.4 (2014-10-19)
 ----------------
 
-- implemented ``odb log``
-- implemented ``odb purge``
-- implemented ``odb tag`` and revert to tag
-- implemented ``odb tags``
-- renamed version to revision
-- renamed snapshot() to commit()
+- Implemented ``odb log``
+- Implemented ``odb purge``
+- Implemented ``odb tag`` and revert to tag
+- Implemented ``odb tags``
+- Renamed version to revision
+- Renamed snapshot() to commit()
 
 0.5 (?)
 -------
 
-- Works on Python 3
+- Works on Python 3.1+
+- Works on Postgres 9.1 and maybe lower
 - ``odb purge keeptags`` : purge all but tags
