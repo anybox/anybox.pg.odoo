@@ -186,7 +186,9 @@ class ODB(object):
 
     def purge(self, what, confirm=False):
         """ purge the revisions
-        what can be: 'all'
+        ``what`` can be::
+        - ``all``: drop all revisions
+        - ``keeptags``: drop all untagged revisions
         """
         # first get what will be purged, then confirm
         to_purge = [i for i in self.log() if i['db'] != self.db]
