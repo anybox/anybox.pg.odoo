@@ -1,7 +1,7 @@
 import unittest
 import time
 
-from odb import ODB, TagExists
+from .odb import ODB, TagExists
 
 
 class TestCommit(unittest.TestCase):

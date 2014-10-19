@@ -35,4 +35,5 @@ Changelog
 0.5 (?)
 -------
 
+- Works on Python 3
 - ``odb purge keeptags`` : purge all but tags

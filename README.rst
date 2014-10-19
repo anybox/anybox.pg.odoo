@@ -2,13 +2,14 @@ anybox.pg.odoo
 ==============
 
 This tool basically manages versionned snapshots of the current database,
-mimicking the common workflow of VCS tools such as init, commit, revert.  It
-was first created to snapshot Odoo databases but may be easily modified to be
+mimicking the common workflow of VCS tools such as init, commit, revert, log, etc.
+It was first created to snapshot Odoo databases but may be easily modified to be
 agnostic.
 
 Install
 -------
 
+This tool works on Python 2.7 and Python 3.
 Install as any normal Python distribution, in a virtualenv, buildout or
 system-wide. The only current dependency is `psycopg2
 <https://pypi.python.org/pypi/psycopg2/>`_ >= 2.5.

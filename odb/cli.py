@@ -7,7 +7,7 @@ CONF = os.path.expanduser('~/.anybox.pg.odoo')
 def main():
     parser = argparse.ArgumentParser(
         prog="odb",
-        description=u"Postgresql snapshot versionning tool (for Odoo)",)
+        description="Postgresql snapshot versionning tool (for Odoo)",)
     subparsers = parser.add_subparsers(help='sub-commands')
     parser_init = subparsers.add_parser('init', help='Set the current db')
     parser_init.add_argument('db', metavar='db', nargs=1, help='database to work on')
@@ -31,12 +31,12 @@ def main():
         odb = ODB(args.db[0])
         odb.init()
         open(CONF, 'w').write(odb.db)
-        print('Now revision %s' % odb.revision())
+        print(('Now revision %s' % odb.revision()))
 
     def commit(args):
         odb = ODB(open(CONF).read())
         odb.commit()
-        print('Now revision %s' % odb.revision())
+        print(('Now revision %s' % odb.revision()))
 
     def revert(args):
         odb = ODB(open(CONF).read())
@@ -46,42 +46,42 @@ def main():
             odb.revert(tag=args.revision)
         else:
             odb.revert()
-        print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
+        print(('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision())))
 
     def info(args):
         odb = ODB(open(CONF).read())
-        print('database: %s' % odb.db)
-        print('revision : %s (parent: %s)' % (odb.revision(), odb.parent()))
+        print(('database: %s' % odb.db))
+        print(('revision : %s (parent: %s)' % (odb.revision(), odb.parent())))
 
     def log(args):
         odb = ODB(open(CONF).read())
         for logitem in odb.log():
-            print '%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem
+            print(('%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem))
             if 'tag' in logitem:
-                print '\ttag: %s' % logitem['tag']
+                print(('\ttag: %s' % logitem['tag']))
 
     def purge(args):
         odb = ODB(open(CONF).read())
         try:
             to_purge = odb.purge(args.what, args.yes)
         except NotImplementedError:
-            print 'Unkown purge command'
+            print('Unkown purge command')
             return
         if not to_purge:
-            print 'Nothing to purge'
+            print('Nothing to purge')
             return
-        print('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge]))
-        if args.yes or raw_input('Confirm? [y/N] ').lower() == 'y':
+        print(('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge])))
+        if args.yes or input('Confirm? [y/N] ').lower() == 'y':
             odb.purge(args.what, True)
-            print 'Purged'
+            print('Purged')
         else:
-            print 'Cancelled'
+            print('Cancelled')
 
     def tags(args):
         odb = ODB(open(CONF).read())
         tags = odb.tag()
         for item in tags:
-            print '%(tag)s (%(db)s)' % item
+            print(('%(tag)s (%(db)s)' % item))
 
     def tag(args):
         odb = ODB(open(CONF).read())
@@ -90,7 +90,7 @@ def main():
         try:
             odb.tag(args.tag, args.revision)
         except TagExists:
-            print 'This tag already exists'
+            print('This tag already exists')
 
     parser_init.set_defaults(func=init)
     parser_commit.set_defaults(func=commit)
@@ -103,4 +103,7 @@ def main():
     parser_tag.set_defaults(func=tag)
 
     args = parser.parse_args()
-    args.func(args)
+    if hasattr(args, 'func'):
+        args.func(args)
+    else:
+        parser.print_help()
