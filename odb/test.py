@@ -10,7 +10,7 @@ class TestCommit(unittest.TestCase):
         """
         db = self.db = 'testodb-' + time.strftime('%Y%m%d%H%M%S')
         # create db
-        ODB(db).createdb()
+        ODB(db)._createdb()
 
     def test_simple_commit(self):
         """ first simple scenario with commit and revert
@@ -43,7 +43,7 @@ class TestCommit(unittest.TestCase):
         odb.commit()
         self.assertEqual(odb.revision(), 4)
         self.assertEqual(odb.parent(), 3)
-        # just check that init again doesn't hurt
+        # just check that init again doesn't hurt even when passing another revision
         self.assertEqual(odb.init(), 4)
 
         # revert to 2

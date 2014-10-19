@@ -23,7 +23,7 @@ class ODB(object):
             db = self.db
         return psycopg2.connect('dbname=%s' % db)
 
-    def createdb(self):
+    def _createdb(self):
         """ createdb used for tests
         """
         db = self.db
@@ -117,7 +117,6 @@ class ODB(object):
 
     def commit(self, msg=None):
         """ create a snapshot and change the current revision
-        Corresponds to the commit command
         """
         if msg:
             self.set('message', msg)
