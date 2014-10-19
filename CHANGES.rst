@@ -1,26 +1,14 @@
 Changelog
 =========
 
-0.1 (2014-10-15)
+0.5 (2014-10-19)
 ----------------
 
-- Initial draft
-
-0.2 (2014-10-15 after sleeping)
--------------------------------
-
-- Fixed packaging
-- Fixed the ``revert`` behaviour
-- Allow to revert without argument
-- Improved doc
-
-0.3 (2014-10-16)
-----------------
-
-- Keep the same db as the current one to work in place
-- Fixed versionning and start at 1
-- Also disconnect during revert operation
-- Removed the unneeded tip
+- Works on Python 3.1+
+- Works on Postgres 9.1 and maybe lower
+- ``odb purge keeptags`` : purge all but tags
+- implemented commit message
+- revert now checks that the source db exists (much safer)
 
 0.4 (2014-10-19)
 ----------------
@@ -32,11 +20,23 @@ Changelog
 - Renamed version to revision
 - Renamed snapshot() to commit()
 
-0.5 (?)
--------
+0.3 (2014-10-16)
+----------------
 
-- Works on Python 3.1+
-- Works on Postgres 9.1 and maybe lower
-- ``odb purge keeptags`` : purge all but tags
-- implemented commit message
-- revert now checks that the source db exists (much safer)
+- Keep the same db as the current one to work in place
+- Fixed versionning and start at 1
+- Also disconnect during revert operation
+- Removed the unneeded tip
+
+0.2 (2014-10-15 after sleeping)
+-------------------------------
+
+- Fixed packaging
+- Fixed the ``revert`` behaviour
+- Allow to revert without argument
+- Improved doc
+
+0.1 (2014-10-15)
+----------------
+
+- Initial draft
