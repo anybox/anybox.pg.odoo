@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name="anybox.pg.odoo",
-    version="0.5",
+    version="0.6",
     packages=find_packages(),
     install_requires=['psycopg2>=2.5'],
     test_suite='odb.test',
@@ -25,7 +25,7 @@ setup(
     description="Postgresql database snapshot versionning tool",
     long_description=open('README.rst').read() + open('CHANGES.rst').read(),
     license="GPLv3",
-    keywords="postgresql odoo snapshot commit version",
+    keywords="odb postgresql odoo snapshot commit version",
     url="",
 
     entry_points={
