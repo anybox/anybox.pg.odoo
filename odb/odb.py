@@ -174,9 +174,11 @@ class ODB(object):
         what can be: 'all'
         """
         # first get what will be purged, then confirm
-        to_purge = [l for l in self.log() if l['db'] != self.db]
+        to_purge = [i for i in self.log() if i['db'] != self.db]
         if what == 'all':
             pass
+        elif what == 'keeptags':
+            to_purge = [i for i in to_purge if 'tag' not in i]
         else:
             raise NotImplementedError('Bad purge command')
         if confirm:

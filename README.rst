@@ -15,8 +15,7 @@ system-wide. The only current dependency is `psycopg2
 
 Example with a virtualenv::
 
-    $ virtualenv sandbox
-    $ source sandbox/bin/activate
+    $ virtualenv sandbox && source sandbox/bin/activate
     $ pip install anybox.pg.odoo
 
 Usage
@@ -99,6 +98,16 @@ The you can display all the revisions with ``odb log``::
         revision: 1
         parent: 0
 
+Then you can purge all the revisions except the tags::
+
+    $ odb purge keeptags
+
+or all the revisions::
+
+    $ odb purge all
+
+
+
 
 How it works and pollutes
 -------------------------
@@ -113,12 +122,9 @@ How it works and pollutes
 what's next? (todo list)
 ------------------------
 
-- disable connections on versionned databases (see datallowconn)
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
-- Fix obvious bugs
 - Python 3 compatibility
 - Implement diff (#fear)
-- Allow to drop all untagged databases
 - Improve the database naming scheme
 - Try to make the system transactional
 
@@ -127,3 +133,6 @@ Contribute
 
 Mercurial repository and bug tracker: https://bitbucket.org/anybox/anybox.pg.odoo
 
+Run tests with::
+
+    $ python setup.py test

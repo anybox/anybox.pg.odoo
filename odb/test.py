@@ -87,10 +87,17 @@ class TestCommit(unittest.TestCase):
         odb.tag('v3')
         odb.commit()
         self.assertEqual(odb.get('tag'), None)
+        # delete the tag
+        odb.tag('v3', delete=True)
 
         # purge without confirmation does nothing
-        odb.purge('all')
+        odb.purge('keeptags')
         self.assertEqual(len(odb.log()), 6)
+
+        # purge all except tags
+        purged = odb.purge('keeptags', confirm=True)
+        self.assertEqual(len(purged), 4)
+        self.assertEqual(len(odb.log()), 2)
 
         # check for real
         odb.purge('all', confirm=True)

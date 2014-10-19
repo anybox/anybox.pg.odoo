@@ -18,7 +18,7 @@ def main():
     parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
     parser_log = subparsers.add_parser('log', help='List all available revisions')
     parser_purge = subparsers.add_parser('purge', help="Destroy revisions")
-    parser_purge.add_argument('what', choices=['all'],
+    parser_purge.add_argument('what', choices=['all', 'keeptags'],
                               help='all: destroy all revisions except the current db')
     parser_purge.add_argument('-y', '--yes', action='store_true', help='Destroy without asking')
     parser_tags = subparsers.add_parser('tags', help="List all tags")
@@ -67,8 +67,11 @@ def main():
         except NotImplementedError:
             print 'Unkown purge command'
             return
+        if not to_purge:
+            print 'Nothing to purge'
+            return
         print('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge]))
-        if args.yes or raw_input('Confirm? y[N] ').lower() == 'y':
+        if args.yes or raw_input('Confirm? [y/N] ').lower() == 'y':
             odb.purge(args.what, True)
             print 'Purged'
         else:

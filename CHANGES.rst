@@ -32,3 +32,7 @@ Changelog
 - renamed version to revision
 - renamed snapshot() to commit()
 
+0.5 (?)
+-------
+
+- ``odb purge keeptags`` : purge all but tags
