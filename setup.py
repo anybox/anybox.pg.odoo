@@ -23,7 +23,7 @@ setup(
     author="Christophe Combelles",
     author_email="ccomb@anybox.fr",
     description="Postgresql database snapshot versionning tool",
-    long_description=open('README.rst').read() + open('CHANGES.rst').read(),
+    long_description=open('README.rst').read() + '\n' + open('CHANGES.rst').read(),
     license="GPLv3",
     keywords="odb postgresql odoo snapshot commit version",
     url="",
