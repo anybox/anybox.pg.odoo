@@ -6,6 +6,8 @@ mimicking the common workflow of VCS tools such as init, commit, revert, log, et
 It was first created to snapshot Odoo databases but may be easily modified to be
 agnostic.
 
+.. contents::
+
 Install
 -------
 
