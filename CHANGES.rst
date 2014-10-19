@@ -38,3 +38,4 @@ Changelog
 - Works on Python 3.1+
 - Works on Postgres 9.1 and maybe lower
 - ``odb purge keeptags`` : purge all but tags
+- implemented commit message

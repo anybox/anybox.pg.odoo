@@ -111,10 +111,12 @@ class ODB(object):
                    "WHERE pg_stat_activity.datname=%%s "
                    "AND %s <> pg_backend_pid()" % (pid, pid), (db,))
 
-    def commit(self):
+    def commit(self, msg=None):
         """ create a snapshot and change the current revision
         Corresponds to the commit command
         """
+        if msg:
+            self.set('message', msg)
         revision = self.revision()
         targetdb = '*'.join([self.db, str(revision)])
         with self.connect('postgres') as cn, cn.cursor() as cr:
@@ -169,6 +171,9 @@ class ODB(object):
                 tag = self.get('tag', cr)
                 if tag:
                     log[-1]['tag'] = tag
+                msg = self.get('message', cr)
+                if msg:
+                    log[-1]['message'] = msg
         return sorted(log, key=lambda x: x['revision'], reverse=True)
 
     def purge(self, what, confirm=False):

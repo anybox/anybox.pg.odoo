@@ -1,7 +1,7 @@
 import os
 try:
     import argparse
-except ImportError: # Python3.1
+except ImportError:  # Python3.1
     print("Please install argparse")
     exit()
 from .odb import ODB, TagExists
@@ -16,6 +16,7 @@ def main():
     parser_init = subparsers.add_parser('init', help='Set the current db')
     parser_init.add_argument('db', metavar='db', nargs=1, help='database to work on')
     parser_commit = subparsers.add_parser('commit', help='Save the current db in a new revision')
+    parser_commit.add_argument('-m', '--message', nargs='?', help='Commit message')
     parser_info = subparsers.add_parser('info', help='Display the revision of the current db')
     parser_revert = subparsers.add_parser(
         'revert', help='Drop the current db and clone from a previous revision')
@@ -35,12 +36,12 @@ def main():
         odb = ODB(args.db[0])
         odb.init()
         open(CONF, 'w').write(odb.db)
-        print(('Now revision %s' % odb.revision()))
+        print('Now revision %s' % odb.revision())
 
     def commit(args):
         odb = ODB(open(CONF).read())
-        odb.commit()
-        print(('Now revision %s' % odb.revision()))
+        odb.commit(msg=args.message)
+        print('Now revision %s' % odb.revision())
 
     def revert(args):
         odb = ODB(open(CONF).read())
@@ -50,19 +51,24 @@ def main():
             odb.revert(tag=args.revision)
         else:
             odb.revert()
-        print(('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision())))
+        print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
 
     def info(args):
         odb = ODB(open(CONF).read())
-        print(('database: %s' % odb.db))
-        print(('revision : %s (parent: %s)' % (odb.revision(), odb.parent())))
+        print('database: %s' % odb.db)
+        print('revision : %s (parent: %s)' % (odb.revision(), odb.parent()))
+        tag = odb.get('tag')
+        if tag:
+            print('tag: %s' % tag)
 
     def log(args):
         odb = ODB(open(CONF).read())
         for logitem in odb.log():
-            print(('%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem))
+            print('%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem)
+            if 'message' in logitem:
+                print('\tmessage: %s' % logitem['message'])
             if 'tag' in logitem:
-                print(('\ttag: %s' % logitem['tag']))
+                print('\ttag: %s' % logitem['tag'])
 
     def purge(args):
         odb = ODB(open(CONF).read())
@@ -74,7 +80,7 @@ def main():
         if not to_purge:
             print('Nothing to purge')
             return
-        print(('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge])))
+        print('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge]))
         if args.yes or input('Confirm? [y/N] ').lower() == 'y':
             odb.purge(args.what, True)
             print('Purged')
@@ -85,7 +91,7 @@ def main():
         odb = ODB(open(CONF).read())
         tags = odb.tag()
         for item in tags:
-            print(('%(tag)s (%(db)s)' % item))
+            print('%(tag)s (%(db)s)' % item)
 
     def tag(args):
         odb = ODB(open(CONF).read())

@@ -29,8 +29,8 @@ class TestCommit(unittest.TestCase):
         # the db name remains the same
         self.assertEqual(self.db, odb.db)
 
-        # commit
-        odb.commit()
+        # commit with a message
+        odb.commit(msg='commit message')
         self.assertEqual(odb.revision(), 3)
         self.assertEqual(odb.parent(), 2)
 
@@ -62,6 +62,7 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(revs[-1]['revision'], 1)
         self.assertEqual(revs[1]['db'], self.db + '*4')
         self.assertEqual(revs[0]['revision'], 5)
+        self.assertEqual(revs[-2]['message'], 'commit message')
 
         # tag revision 3 and 5
         odb.tag('v1', 3)
