@@ -1,7 +1,7 @@
 import unittest
 import time
 
-from .odb import ODB, TagExists
+from .odb import ODB, TagExists, NoTemplate
 
 
 class TestCommit(unittest.TestCase):
@@ -90,6 +90,9 @@ class TestCommit(unittest.TestCase):
         self.assertEqual(odb.get('tag'), None)
         # delete the tag
         odb.tag('v3', delete=True)
+
+        # revert to a non existant revision
+        self.assertRaises(NoTemplate, odb.revert, 99)
 
         # purge without confirmation does nothing
         odb.purge('keeptags')

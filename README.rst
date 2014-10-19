@@ -126,7 +126,6 @@ what's next? (todo list)
 - Use a dedicated database to store version information instead of the ``ir_config_parameter`` table
 - Implement diff (#fear)
 - Improve the database naming scheme
-- Try to make the system transactional
 
 Contribute
 ----------

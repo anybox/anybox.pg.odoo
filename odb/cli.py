@@ -4,7 +4,7 @@ try:
 except ImportError:  # Python3.1
     print("Please install argparse")
     exit()
-from .odb import ODB, TagExists
+from .odb import ODB, TagExists, NoTemplate
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
 
 
@@ -45,13 +45,16 @@ def main():
 
     def revert(args):
         odb = ODB(open(CONF).read())
-        if args.revision and args.revision.isdigit():
-            odb.revert(parent=args.revision)
-        elif args.revision and args.revision.isalnum():
-            odb.revert(tag=args.revision)
-        else:
-            odb.revert()
-        print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
+        try:
+            if args.revision and args.revision.isdigit():
+                odb.revert(parent=args.revision)
+            elif args.revision and args.revision.isalnum():
+                odb.revert(tag=args.revision)
+            else:
+                odb.revert()
+            print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
+        except NoTemplate, e:
+            print(e.message)
 
     def info(args):
         odb = ODB(open(CONF).read())

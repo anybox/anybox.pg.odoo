@@ -6,6 +6,10 @@ class TagExists(Exception):
     pass
 
 
+class NoTemplate(Exception):
+    pass
+
+
 class ODB(object):
     """class representing an Odoo instance
     """
@@ -147,6 +151,10 @@ class ODB(object):
             self._disconnect(cr, self.db)
         with self.connect('postgres') as cn, cn.cursor() as cr:
             cn.autocommit = True
+            # check that the source db exists to avoid dropping too early
+            cr.execute('SELECT count(*) FROM pg_catalog.pg_database where datname=%s', (sourcedb,))
+            if not cr.fetchone()[0]:
+                raise NoTemplate('Cannot revert because the source db does not exist')
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(self.db), AsIs(sourcedb)))
         self.set('revision', currevision)

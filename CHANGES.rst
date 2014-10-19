@@ -39,3 +39,4 @@ Changelog
 - Works on Postgres 9.1 and maybe lower
 - ``odb purge keeptags`` : purge all but tags
 - implemented commit message
+- revert now checks that the source db exists (much safer)
