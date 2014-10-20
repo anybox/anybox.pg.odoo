@@ -53,8 +53,8 @@ def main():
             else:
                 odb.revert()
             print('Reverted to parent %s, now at revision %s' % (odb.parent(), odb.revision()))
-        except NoTemplate, e:
-            print(e.message)
+        except NoTemplate as e:
+            print(e.args[0])
 
     def info(args):
         odb = ODB(open(CONF).read())
