@@ -84,7 +84,7 @@ def main():
             print('Nothing to purge')
             return
         print('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge]))
-        if args.yes or input('Confirm? [y/N] ').lower() == 'y':
+        if args.yes or raw_input('Confirm? [y/N] ').lower() == 'y':
             odb.purge(args.what, True)
             print('Purged')
         else:
