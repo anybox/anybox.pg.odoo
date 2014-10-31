@@ -129,6 +129,7 @@ class ODB(object):
         self.set('revision', revision + 1)
         self.set('parent', revision)
         self.rem('tag')
+        self.rem('message')
 
     def revert(self, parent=None, tag=None):
         """ drop the current db and start back from this parent
@@ -159,6 +160,7 @@ class ODB(object):
         self.set('revision', currevision)
         self.set('parent', parent)
         self.rem('tag')
+        self.rem('message')
 
     def log(self):
         """ return a list of previous revisions, each revision being a dict with needed infos
