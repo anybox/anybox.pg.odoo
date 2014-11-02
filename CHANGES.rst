@@ -1,10 +1,11 @@
 Changelog
 =========
 
-0.6 (?)
--------
+0.6 (2014-11-02)
+----------------
 
-- ...
+- fixed error in Python 3
+- remove tag and message of the current version after commit and revert
 
 0.5 (2014-10-19)
 ----------------
