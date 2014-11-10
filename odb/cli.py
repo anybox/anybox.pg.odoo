@@ -1,4 +1,5 @@
 import os
+import sys
 try:
     import argparse
 except ImportError:  # Python3.1
@@ -6,6 +7,10 @@ except ImportError:  # Python3.1
     exit()
 from .odb import ODB, TagExists, NoTemplate
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
+
+get_input = input
+if sys.version[0] == '2':
+    get_input = raw_input
 
 
 def main():
@@ -84,7 +89,7 @@ def main():
             print('Nothing to purge')
             return
         print('Dropping these databases: %s' % ', '.join([i['db'] for i in to_purge]))
-        if args.yes or raw_input('Confirm? [y/N] ').lower() == 'y':
+        if args.yes or get_input('Confirm? [y/N] ').lower() == 'y':
             odb.purge(args.what, True)
             print('Purged')
         else:
