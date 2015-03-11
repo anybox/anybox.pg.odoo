@@ -5,6 +5,11 @@ try:
 except ImportError:  # Python3.1
     print("Please install argparse")
     exit()
+try:
+    import configparser
+except ImportError:  # Python3.1
+    from backports import configparser
+
 from .odb import ODB, TagExists, NoTemplate
 CONF = os.path.expanduser('~/.anybox.pg.odoo')
 
@@ -19,7 +24,13 @@ def main():
         description="Postgresql snapshot versionning tool (for Odoo)",)
     subparsers = parser.add_subparsers(help='sub-commands')
     parser_init = subparsers.add_parser('init', help='Set the current db')
-    parser_init.add_argument('db', metavar='db', nargs=1, help='database to work on')
+    parser_init.add_argument('db', metavar='db', nargs=1, help='database name to work on')
+    parser_init.add_argument('--user', '-u', metavar='Username', help='db user')
+    parser_init.add_argument('--password', '-p', metavar='pass',
+                             help='db user password. BE CAREFUL this is saved as clear text'
+                                  'in your conf file (%s), prefer using pam users.' % CONF)
+    parser_init.add_argument('--host', '-H', metavar='Hostname', help='The DB hostname host')
+    parser_init.add_argument('--port', '-P', metavar='Port', help='The DB port to connect on')
     parser_commit = subparsers.add_parser('commit', help='Save the current db in a new revision')
     parser_commit.add_argument('-m', '--message', nargs='?', help='Commit message')
     parser_info = subparsers.add_parser('info', help='Display the revision of the current db')
@@ -37,19 +48,42 @@ def main():
     parser_tag.add_argument('tag', help='Tag')
     parser_tag.add_argument('revision', metavar='revision', nargs='?', help='Revision')
 
+    def odb_from_conf_file(conf_file):
+        config = configparser.ConfigParser()
+        config.read(conf_file)
+        dbname = config.get('database', 'dbname')
+        user = config.get('database', 'user', fallback=None)
+        password = config.get('database', 'password', fallback=None)
+        host = config.get('database', 'host', fallback=None)
+        port = config.get('database', 'port', fallback=None)
+        return ODB(dbname, user, password=password, host=host, port=port)
+
     def init(args):
-        odb = ODB(args.db[0])
+        odb = ODB(args.db[0], user=args.user, password=args.password,
+                  host=args.host, port=args.port)
         odb.init()
-        open(CONF, 'w').write(odb.db)
+        config = configparser.ConfigParser()
+        config.add_section('database')
+        config.set('database', 'dbname', odb.db)
+        if odb.user:
+            config.set('database', 'user', odb.user)
+        if odb.password:
+            config.set('database', 'password', odb.password)
+        if odb.host:
+            config.set('database', 'host', odb.host)
+        if odb.port:
+            config.set('database', 'port', odb.port)
+        with open(CONF, 'w') as configfile:
+            config.write(configfile)
         print('Now revision %s' % odb.revision())
 
     def commit(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         odb.commit(msg=args.message)
         print('Now revision %s' % odb.revision())
 
     def revert(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         try:
             if args.revision and args.revision.isdigit():
                 odb.revert(parent=args.revision)
@@ -62,15 +96,21 @@ def main():
             print(e.args[0])
 
     def info(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         print('database: %s' % odb.db)
+        if odb.user:
+            print('user: %s' % odb.user)
+        if odb.host:
+            print('host: %s' % odb.host)
+        if odb.port:
+            print('port: %s' % odb.port)
         print('revision : %s (parent: %s)' % (odb.revision(), odb.parent()))
         tag = odb.get('tag')
         if tag:
             print('tag: %s' % tag)
 
     def log(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         for logitem in odb.log():
             print('%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem)
             if 'message' in logitem:
@@ -79,7 +119,7 @@ def main():
                 print('\ttag: %s' % logitem['tag'])
 
     def purge(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         try:
             to_purge = odb.purge(args.what, args.yes)
         except NotImplementedError:
@@ -96,13 +136,13 @@ def main():
             print('Cancelled')
 
     def tags(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         tags = odb.tag()
         for item in tags:
             print('%(tag)s (%(db)s)' % item)
 
     def tag(args):
-        odb = ODB(open(CONF).read())
+        odb = odb_from_conf_file(CONF)
         if args.delete:
             return odb.tag(args.tag, delete=True)
         try:

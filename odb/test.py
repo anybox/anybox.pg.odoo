@@ -107,6 +107,32 @@ class TestCommit(unittest.TestCase):
         odb.purge('all', confirm=True)
         self.assertEqual(len(odb.log()), 1)
 
+    def test_connection_string(self):
+        odb = ODB(self.db)
+        self.assertEqual(
+            'dbname=%s' % self.db,
+            odb._get_connection_string()
+        )
+        self.assertEqual(
+            'dbname=%s host=hostname' % self.db,
+            odb._get_connection_string(host="hostname")
+        )
+        self.assertEqual(
+            'dbname=%s user=ccomb host=hostname' % self.db,
+            odb._get_connection_string(host='hostname', user='ccomb')
+        )
+        self.assertEqual(
+            'dbname=%s user=ccomb host=hostname port=5433' % self.db,
+            odb._get_connection_string(host='hostname', user='ccomb', port="5433")
+        )
+        self.assertEqual(
+            'dbname=%s user=ccomb password=**** host=hostname port=5433' % self.db,
+            odb._get_connection_string(user='ccomb', password='****',
+                                       host='hostname', port="5433")
+        )
+        # this is need to avoid to crash on tearDown
+        odb.init()
+
     def tearDown(self):
         """ cleanup
         """

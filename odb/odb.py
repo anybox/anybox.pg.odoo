@@ -13,15 +13,38 @@ class NoTemplate(Exception):
 class ODB(object):
     """class representing an Odoo instance
     """
-    def __init__(self, db=None):
+    def __init__(self, db=None, user=None, password=None, host=None, port=None):
         self.db = db
+        self.user = user
+        self.password = password
+        self.host = host
+        self.port = port
 
-    def connect(self, db=None):
+    def connect(self, db=None, user=None, password=None, host=None, port=None):
         """ connect to the current db unless specified
         """
-        if db is None:
-            db = self.db
-        return psycopg2.connect('dbname=%s' % db)
+        return psycopg2.connect(
+            self._get_connection_string(db, user, password, host, port))
+
+    def _get_connection_string(self, db=None, user=None, password=None, host=None, port=None):
+        """ Create connection string to use to connect to postgresql
+        """
+        db = self.db if db is None else db
+        user = self.user if user is None else user
+        password = self.password if password is None else password
+        host = self.host if host is None else host
+        port = self.port if port is None else port
+
+        connection_string = 'dbname=%s' % db
+        if user:
+            connection_string += ' user=%s' % user
+        if password:
+            connection_string += ' password=%s' % password
+        if host:
+            connection_string += ' host=%s' % host
+        if port:
+            connection_string += ' port=%s' % port
+        return connection_string
 
     def _createdb(self):
         """ createdb used for tests
