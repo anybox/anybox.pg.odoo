@@ -1,9 +1,15 @@
+import sys
 from setuptools import setup, find_packages
+
+requirements = ['psycopg2>=2.5']
+if sys.version_info.major == 2:
+    requirements.append('configparser')
+
 setup(
     name="anybox.pg.odoo",
     version="0.7",
     packages=find_packages(),
-    install_requires=['psycopg2>=2.5'],
+    install_requires=requirements,
     test_suite='odb.test',
     classifiers=[
         'Development Status :: 4 - Beta',
