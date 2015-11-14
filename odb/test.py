@@ -133,6 +133,183 @@ class TestCommit(unittest.TestCase):
         # this is need to avoid to crash on tearDown
         odb.init()
 
+    def test_glog(self):
+        odb = ODB(self.db)
+        # this is need to avoid to crash on tearDown
+        odb.init()
+        self.assertEqual(2, odb._nb_interval(0))
+        self.assertEqual(2, odb._nb_interval(1))
+        self.assertEqual(2, odb._nb_interval(2))
+        self.assertEqual(4, odb._nb_interval(3))
+        self.assertEqual(6, odb._nb_interval(4))
+        self.assertEqual(8, odb._nb_interval(5))
+        revs = [{'db': 'test*1',
+                 'message': 'commit 1',
+                 'parent': 0,
+                 'revision': 1,
+                 'tag': 'tag1'},
+                {'db': 'test*2',
+                 'message': 'commit 2',
+                 'parent': 1,
+                 'revision': 2,
+                 'tag': 'tag2'},
+                ]
+        output = odb._glog_output(revs)
+        expected = ['o\t2: commit 2', '|', '|', 'o\t1: commit 1']
+        self.assertEquals(expected, output)
+        revs = [{'db': 'test*1',
+                 'message': 'commit 1',
+                 'parent': 0,
+                 'revision': 1,
+                 'tag': 'tag1'},
+                {'db': 'test*2',
+                 'message': 'commit 2',
+                 'parent': 1,
+                 'revision': 2,
+                 'tag': 'tag2'},
+                {'db': 'test*3',
+                 'message': 'commit 3',
+                 'parent': 1,
+                 'revision': 3,
+                 'tag': 'tag3'},
+                ]
+        output = odb._glog_output(revs)
+        expected = [
+            'o |\t3: commit 3',
+            '| |',
+            '| |',
+            '| o\t2: commit 2',
+            '| |',
+            '|/',
+            'o\t1: commit 1']
+        self.assertEquals(expected, output)
+        revs = [{'db': 'test*1',
+                 'message': 'commit 1',
+                 'parent': 0,
+                 'revision': 1, },
+                {'db': 'test*3',
+                 'message': 'commit 3',
+                 'parent': 2,
+                 'revision': 3, },
+                {'db': 'test*4',
+                 'message': 'commit 4',
+                 'parent': 3,
+                 'revision': 4, },
+                ]
+        output = odb._glog_output(revs)
+        expected = [
+            '| o\t4: commit 4',
+            '| |',
+            '| |',
+            '| o\t3: commit 3',
+            '|',
+            '|',
+            'o\t1: commit 1']
+        self.assertEquals(expected, output)
+        revs = [{'db': 'test*1',
+                 'message': 'commit 1',
+                 'parent': 0,
+                 'revision': 1, },
+                {'db': 'test*3',
+                 'message': 'commit 3',
+                 'parent': 2,
+                 'revision': 3, },
+                {'db': 'test*4',
+                 'message': 'commit 4',
+                 'parent': 1,
+                 'revision': 4, },
+                ]
+        output = odb._glog_output(revs)
+        expected = [
+            'o |\t4: commit 4',
+            '| |',
+            '| |',
+            '| o\t3: commit 3',
+            '|',
+            '|',
+            'o\t1: commit 1']
+        self.assertEquals(expected, output)
+        revs = [{'db': 'test*1',
+                 'message': 'commit 1',
+                 'parent': 0,
+                 'revision': 1,
+                 'tag': 'tag1'},
+                {'db': 'test*2',
+                 'message': 'commit 2',
+                 'parent': 1,
+                 'revision': 2, },
+                {'db': 'test*3',
+                 'message': 'commit 3',
+                 'revision': 3,
+                 'parent': 2, },
+                {'db': 'test*4',
+                 'message': 'commit 4',
+                 'revision': 4,
+                 'parent': 1,
+                 'tag': 'tag4'},
+                {'db': 'test*5',
+                 'message': 'commit 5',
+                 'revision': 5,
+                 'parent': 4, },
+                {'db': 'test*6',
+                 'message': 'commit 6',
+                 'revision': 6,
+                 'parent': 1, },
+                {'db': 'test*7',
+                 'message': 'commit 7',
+                 'revision': 7,
+                 'parent': 1, },
+                {'db': 'test*8',
+                 'message': 'commit 8',
+                 'revision': 8,
+                 'parent': 7, },
+                {'db': 'test*9',
+                 'message': 'commit 9',
+                 'revision': 9,
+                 'parent': 1, },
+                {'db': 'test*10',
+                 'message': 'commit 10',
+                 'revision': 10,
+                 'parent': 7, },
+                ]
+        output = odb._glog_output(revs)
+        expected = [
+            '| o | | | |\t10: commit 10',
+            '| | | | | |',
+            '| | | | | |',
+            'o | | | | |\t9: commit 9',
+            '| | | | | |',
+            '| | | | | |',
+            '| | o | | |\t8: commit 8',
+            '| | | | | |',
+            '| |/ / / /',
+            '| o | | |\t7: commit 7',
+            '| | | | |',
+            '| | | | |',
+            '| | o | |\t6: commit 6',
+            '| | | | |',
+            '| | | | |',
+            '| | | o |\t5: commit 5',
+            '| | | | |',
+            '| | | | |',
+            '| | | o |\t4: commit 4',
+            '| | | | |',
+            '| | | | |',
+            '| | | | o\t3: commit 3',
+            '| | | | |',
+            '| | | | |',
+            '| | | | o\t2: commit 2',
+            '| / / / /',
+            '|/ / / /',
+            '| / / /',
+            '|/ / /',
+            '| / /',
+            '|/ /',
+            '| /',
+            '|/',
+            'o\t1: commit 1', ]
+        self.assertEquals(expected, output)
+
     def tearDown(self):
         """ cleanup
         """

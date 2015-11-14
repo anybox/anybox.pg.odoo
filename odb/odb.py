@@ -185,7 +185,7 @@ class ODB(object):
         self.rem('tag')
         self.rem('message')
 
-    def log(self):
+    def log(self, reversed=True):
         """ return a list of previous revisions, each revision being a dict with needed infos
         """
         log = []
@@ -206,7 +206,63 @@ class ODB(object):
                 msg = self.get('message', cr)
                 if msg:
                     log[-1]['message'] = msg
-        return sorted(log, key=lambda x: x['revision'], reverse=True)
+        return sorted(log, key=lambda x: x['revision'], reverse=reversed)
+
+    def glog(self):
+        return self._glog_output(self.log(reversed=False))
+
+    def _nb_interval(self, children_count):
+        interval = (children_count - 1) * 2
+        return interval if interval > 0 else 2
+
+    def _glog_output(self, revs):
+        dag = {}
+        output = []
+        branches = []
+        for rev in revs:
+            dag[rev['revision']] = {'children': [],
+                                    'parent': [rev['parent']]}
+            if dag.get(rev['parent'], False):
+                dag[rev['parent']]['children'].append(rev['revision'])
+        branches += [revs[0]['revision']]
+        for rev in revs:
+            new_branche = True
+            if rev['revision'] in branches:
+                new_branche = False
+                index = branches.index(rev['revision'])
+            else:
+                index = len(branches)
+            graph = '| ' * index + 'o ' + '| ' * (len(branches) - 1 - index)
+            # if dag.get(dag[rev_id].get())
+            output.append("%s\t%s: %s" %
+                          (graph.strip(), rev['revision'],
+                           rev.get('message', '')))
+            from_b = len(branches)
+            children_count = len(dag[rev['revision']]['children'])
+            interval = self._nb_interval(children_count)
+            for child in dag[rev['revision']]['children']:
+                branches.insert(index, child)
+            if len(dag[rev['revision']]['children']) == 0 and new_branche:
+                branches += [rev['revision']]
+            if children_count > 0 and not new_branche:
+                branches.remove(rev['revision'])
+            to_b = len(branches)
+            j = 0
+            if rev != revs[-1]:
+                for i in range(interval):
+                    if i % 2:
+                        j += 1
+                    if children_count > 1 and interval % 2 == 0:
+                        output += [('| ' * index + '|/ ' + '/ ' * (
+                            from_b + j - 1 - index)).strip()]
+                    elif children_count > 2 and interval % 2 != 0:
+                        output += [('| ' * index + '| / ' + '/ ' * (
+                            from_b + j - 2 - index)).strip()]
+                    else:
+                        output += [('| ' * to_b).strip()]
+                    interval -= 1
+        output.reverse()
+        return output
 
     def purge(self, what, confirm=False):
         """ purge the revisions

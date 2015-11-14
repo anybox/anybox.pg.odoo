@@ -38,6 +38,8 @@ def main():
         'revert', help='Drop the current db and clone from a previous revision')
     parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
     parser_log = subparsers.add_parser('log', help='List all available revisions')
+    parser_log.add_argument('--graph', '-g', action='store_true',
+                            help='display a left graph to highlight history')
     parser_purge = subparsers.add_parser('purge', help="Destroy revisions")
     parser_purge.add_argument('what', choices=['all', 'keeptags'],
                               help='all: destroy all revisions except the current db')
@@ -111,12 +113,19 @@ def main():
 
     def log(args):
         odb = odb_from_conf_file(CONF)
-        for logitem in odb.log():
-            print('%(db)s:\n\trevision: %(revision)s\n\tparent: %(parent)s' % logitem)
-            if 'message' in logitem:
-                print('\tmessage: %s' % logitem['message'])
-            if 'tag' in logitem:
-                print('\ttag: %s' % logitem['tag'])
+        output = []
+        if args.graph:
+            output = odb.glog()
+        else:
+            for logitem in odb.log():
+                output.append('%(db)s:\n\trevision: %(revision)s\n\t'
+                              'parent: %(parent)s' % logitem)
+                if 'message' in logitem:
+                    output.append('\tmessage: %s' % logitem['message'])
+                if 'tag' in logitem:
+                    output.append('\ttag: %s' % logitem['tag'])
+        for line in output:
+            print(line)
 
     def purge(args):
         odb = odb_from_conf_file(CONF)
