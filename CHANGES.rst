@@ -5,7 +5,10 @@ Changelog
 ----------------
 
 - fixed error in Python 3
-- ...
+- implement graph option ``odb log --graph``
+- fixed `issue #7
+  <https://bitbucket.org/anybox/anybox.pg.odoo/issues/7/revert-on-used-db>`_,
+  force to close exists connexion on copied database before make the copy
 
 0.6 (2014-11-02)
 ----------------
