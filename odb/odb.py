@@ -236,7 +236,7 @@ class ODB(object):
             # if dag.get(dag[rev_id].get())
             output.append("%s\t%s: %s" %
                           (graph.strip(), rev['revision'],
-                           rev.get('message', '')))
+                           rev.get('message', '').strip()))
             from_b = len(branches)
             children_count = len(dag[rev['revision']]['children'])
             interval = self._nb_interval(children_count)

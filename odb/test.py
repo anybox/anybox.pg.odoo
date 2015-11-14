@@ -211,7 +211,7 @@ class TestCommit(unittest.TestCase):
                  'parent': 0,
                  'revision': 1, },
                 {'db': 'test*3',
-                 'message': 'commit 3',
+                 'message': 'commit 3\n',
                  'parent': 2,
                  'revision': 3, },
                 {'db': 'test*4',
