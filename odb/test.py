@@ -88,6 +88,26 @@ class TestCommit(unittest.TestCase):
         odb.tag('v3')
         odb.commit()
         self.assertEqual(odb.get('tag'), None)
+
+        # test odb log limit 2
+        revs = odb.log(limit=1)
+        self.assertEquals(len(revs), 1)
+        revs = odb.log(limit=2)
+        self.assertEquals(len(revs), 2)
+        revs = odb.log(limit=3)
+        self.assertEquals(len(revs), 3)
+        revs = odb.log(limit=3, reversed=False)
+        self.assertEquals(len(revs), 3)
+        revs = odb.log(limit=2, reversed=False)
+        self.assertEquals(len(revs), 2)
+        revs = odb.log(limit=1, reversed=False)
+        self.assertEquals(len(revs), 1)
+        # test odb log limit greater than number of commit
+        revs = odb.log(limit=150)
+        self.assertEquals(len(revs), len(odb.log()))
+        revs = odb.log(limit=150, reversed=False)
+        self.assertEquals(len(revs), len(odb.log()))
+
         # delete the tag
         odb.tag('v3', delete=True)
 

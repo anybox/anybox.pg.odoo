@@ -38,6 +38,8 @@ def main():
         'revert', help='Drop the current db and clone from a previous revision')
     parser_revert.add_argument('revision', nargs='?', help='revision to revert to')
     parser_log = subparsers.add_parser('log', help='List all available revisions')
+    parser_log.add_argument('--limit', '-l', type=int, metavar='NUM',
+                            help="limit number of changes displayed")
     parser_log.add_argument('--graph', '-g', action='store_true',
                             help='display a left graph to highlight history')
     parser_purge = subparsers.add_parser('purge', help="Destroy revisions")
@@ -115,9 +117,9 @@ def main():
         odb = odb_from_conf_file(CONF)
         output = []
         if args.graph:
-            output = odb.glog()
+            output = odb.glog(args.limit)
         else:
-            for logitem in odb.log():
+            for logitem in odb.log(args.limit):
                 output.append('%(db)s:\n\trevision: %(revision)s\n\t'
                               'parent: %(parent)s' % logitem)
                 if 'message' in logitem:

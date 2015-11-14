@@ -186,7 +186,7 @@ class ODB(object):
         self.rem('tag')
         self.rem('message')
 
-    def log(self, reversed=True):
+    def log(self, limit=None, reversed=True):
         """ return a list of previous revisions, each revision being a dict with needed infos
         """
         log = []
@@ -207,10 +207,17 @@ class ODB(object):
                 msg = self.get('message', cr)
                 if msg:
                     log[-1]['message'] = msg
-        return sorted(log, key=lambda x: x['revision'], reverse=reversed)
+        revs = sorted(log, key=lambda x: x['revision'], reverse=reversed)
+        if limit:
+            if reversed:
+                revs = revs[:limit]
+            else:
+                if len(revs) > limit:
+                    revs = revs[len(revs) - limit:]
+        return revs
 
-    def glog(self):
-        return self._glog_output(self.log(reversed=False))
+    def glog(self, limit):
+        return self._glog_output(self.log(limit, reversed=False))
 
     def _nb_interval(self, children_count):
         interval = (children_count - 1) * 2

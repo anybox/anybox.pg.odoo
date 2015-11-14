@@ -9,6 +9,9 @@ Changelog
 - fixed `issue #7
   <https://bitbucket.org/anybox/anybox.pg.odoo/issues/7/revert-on-used-db>`_,
   force to close exists connexion on copied database before make the copy
+- Implement `issue #4 <https://bitbucket.org/anybox/anybox.pg.odoo/issues/4/
+  limit-option-to-odb-log>`_ **limit** log option to limit number of changes
+  displayed
 
 0.6 (2014-11-02)
 ----------------
