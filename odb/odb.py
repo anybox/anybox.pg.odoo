@@ -179,6 +179,7 @@ class ODB(object):
             if not cr.fetchone()[0]:
                 raise NoTemplate('Cannot revert because the source db does not exist')
             cr.execute('DROP DATABASE "%s"', (AsIs(self.db),))
+            self._disconnect(cr, sourcedb)
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(self.db), AsIs(sourcedb)))
         self.set('revision', currevision)
         self.set('parent', parent)
