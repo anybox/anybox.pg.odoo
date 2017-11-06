@@ -6,3 +6,4 @@ anybox.pg.odoo.egg-info/
 .*swp$
 dist/
 build/
+cover/

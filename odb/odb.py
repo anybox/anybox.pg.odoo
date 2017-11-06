@@ -131,8 +131,9 @@ class ODB(object):
     def _disconnect(self, cr, db):
         """ kill all pg connections
         """
-        cr.execute('select version()')  # procpid renamed to pid in PG9.2
-        pid = 'pid' if cr.fetchone()[0][:14] >= "PostgreSQL 9.2" else 'procpid'
+        pid = "pid"
+        if cr.connection.server_version < 90200:
+            pid = 'procpid'
         cr.execute("SELECT pg_terminate_backend(pg_stat_activity.%s) "
                    "FROM pg_stat_activity "
                    "WHERE pg_stat_activity.datname=%%s "
