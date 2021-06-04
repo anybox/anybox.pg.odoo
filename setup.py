@@ -1,7 +1,7 @@
 import sys
 from setuptools import setup, find_packages
 
-requirements = ['psycopg2>=2.5']
+requirements = ['psycopg2-binary']
 if sys.version_info.major == 2:
     requirements.append('configparser')
 
