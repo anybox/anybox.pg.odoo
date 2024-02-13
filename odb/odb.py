@@ -24,7 +24,7 @@ class ODB(object):
         """ connect to the current db unless specified
         """
         return psycopg2.connect(
-            self._get_connection_string(db, user, password, host, port))
+            self._get_connection_string(db, user, password, host, port),)
 
     def _get_connection_string(self, db=None, user=None, password=None, host=None, port=None):
         """ Create connection string to use to connect to postgresql
@@ -50,9 +50,9 @@ class ODB(object):
         """ createdb used for tests
         """
         db = self.db
-        with self.connect('postgres') as cn:
-            cn.autocommit = True
-            cn.cursor().execute('CREATE DATABASE "%s"', (AsIs(db),))
+        cn = self.connect('postgres')
+        cn.autocommit = True
+        cn.cursor().execute('CREATE DATABASE "%s"', (AsIs(db),))
         with self.connect(db) as cn, cn.cursor() as cr:
             cr.execute("CREATE TABLE ir_config_parameter "
                        "(key character varying(256), value text)")
@@ -62,8 +62,9 @@ class ODB(object):
         """
         if db is None:
             db = self.db
-        with self.connect('postgres') as cn, cn.cursor() as cr:
-            cn.autocommit = True
+        cn = self.connect('postgres')
+        cn.autocommit = True
+        with cn.cursor() as cr:
             self._disconnect(cr, db)
             cn.cursor().execute('DROP DATABASE "%s"', (AsIs(db),))
 
@@ -146,8 +147,9 @@ class ODB(object):
             self.set('message', msg)
         revision = self.revision()
         targetdb = '*'.join([self.db, str(revision)])
-        with self.connect('postgres') as cn, cn.cursor() as cr:
-            cn.autocommit = True
+        cn = self.connect('postgres')
+        cn.autocommit = True
+        with cn.cursor() as cr:
             self._disconnect(cr, self.db)
             cr.execute('CREATE DATABASE "%s" WITH TEMPLATE "%s"', (AsIs(targetdb), AsIs(self.db)))
         self.set('revision', revision + 1)
@@ -170,11 +172,13 @@ class ODB(object):
         # store revision because we'll drop
         currevision = self.revision()
         sourcedb = '*'.join([self.db, str(parent)])
-        with self.connect() as cn, cn.cursor() as cr:
-            cn.autocommit = True
+        cn = self.connect()
+        cn.autocommit = True
+        with cn.cursor() as cr:
             self._disconnect(cr, self.db)
-        with self.connect('postgres') as cn, cn.cursor() as cr:
-            cn.autocommit = True
+        cn = self.connect('postgres')
+        cn.autocommit = True
+        with cn.cursor() as cr:
             # check that the source db exists to avoid dropping too early
             cr.execute('SELECT count(*) FROM pg_catalog.pg_database where datname=%s', (sourcedb,))
             if not cr.fetchone()[0]:
