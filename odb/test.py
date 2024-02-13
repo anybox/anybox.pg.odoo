@@ -91,22 +91,22 @@ class TestCommit(unittest.TestCase):
 
         # test odb log limit 2
         revs = odb.log(limit=1)
-        self.assertEquals(len(revs), 1)
+        self.assertEqual(len(revs), 1)
         revs = odb.log(limit=2)
-        self.assertEquals(len(revs), 2)
+        self.assertEqual(len(revs), 2)
         revs = odb.log(limit=3)
-        self.assertEquals(len(revs), 3)
+        self.assertEqual(len(revs), 3)
         revs = odb.log(limit=3, reversed=False)
-        self.assertEquals(len(revs), 3)
+        self.assertEqual(len(revs), 3)
         revs = odb.log(limit=2, reversed=False)
-        self.assertEquals(len(revs), 2)
+        self.assertEqual(len(revs), 2)
         revs = odb.log(limit=1, reversed=False)
-        self.assertEquals(len(revs), 1)
+        self.assertEqual(len(revs), 1)
         # test odb log limit greater than number of commit
         revs = odb.log(limit=150)
-        self.assertEquals(len(revs), len(odb.log()))
+        self.assertEqual(len(revs), len(odb.log()))
         revs = odb.log(limit=150, reversed=False)
-        self.assertEquals(len(revs), len(odb.log()))
+        self.assertEqual(len(revs), len(odb.log()))
 
         # delete the tag
         odb.tag('v3', delete=True)
@@ -176,7 +176,7 @@ class TestCommit(unittest.TestCase):
                 ]
         output = odb._glog_output(revs)
         expected = ['o\t2: commit 2', '|', '|', 'o\t1: commit 1']
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
         revs = [{'db': 'test*1',
                  'message': 'commit 1',
                  'parent': 0,
@@ -202,7 +202,7 @@ class TestCommit(unittest.TestCase):
             '| |',
             '|/',
             'o\t1: commit 1']
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
         revs = [{'db': 'test*1',
                  'message': 'commit 1',
                  'parent': 0,
@@ -225,7 +225,7 @@ class TestCommit(unittest.TestCase):
             '|',
             '|',
             'o\t1: commit 1']
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
         revs = [{'db': 'test*1',
                  'message': 'commit 1',
                  'parent': 0,
@@ -248,7 +248,7 @@ class TestCommit(unittest.TestCase):
             '|',
             '|',
             'o\t1: commit 1']
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
         revs = [{'db': 'test*1',
                  'message': 'commit 1',
                  'parent': 0,
@@ -328,7 +328,7 @@ class TestCommit(unittest.TestCase):
             '| /',
             '|/',
             'o\t1: commit 1', ]
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
 
     def tearDown(self):
         """ cleanup
