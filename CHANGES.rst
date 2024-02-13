@@ -4,6 +4,7 @@ Changelog
 0.7 (unreleased)
 ----------------
 
+- fixed setting autocommit before creating new transaction
 - fixed error in Python 3
 - implement graph option ``odb log --graph``
 - fixed `issue #7

@@ -1,7 +1,7 @@
 anybox.pg.odoo
 ==============
 
-This tool basically manages versionned snapshots of the current database,
+This tool basically manages versioned snapshots of the current database,
 mimicking the common workflow of VCS tools such as init, commit, revert, log, etc.
 It was first created to snapshot Odoo databases but may be easily modified to be
 agnostic.
