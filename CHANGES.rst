@@ -1,7 +1,10 @@
 Changelog
 =========
 
-0.7 (unreleased)
+0.8 (unreleased)
+----------------
+
+0.7 (2024-02-13)
 ----------------
 
 - fixed setting autocommit before creating new transaction

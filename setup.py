@@ -7,7 +7,7 @@ if sys.version_info.major == 2:
 
 setup(
     name="anybox.pg.odoo",
-    version="0.7",
+    version="0.8",
     packages=find_packages(),
     install_requires=requirements,
     test_suite='odb.test',
@@ -32,8 +32,7 @@ setup(
     long_description=open('README.rst').read() + '\n' + open('CHANGES.rst').read(),
     license="GPLv3",
     keywords="odb postgresql odoo snapshot commit version",
-    url="",
-
+    url="https://github.com/anybox/anybox.pg.odoo",
     entry_points={
         'console_scripts': [
             'odb=odb.cli:main',
